@@ -18,7 +18,7 @@
 
 ## 安装 CLI
 
-不要使用 `node dist/index.js`。先安装并使用 `clink`。必须使用 `clink-dev-cli` 0.1.1 或更高版本，因为低代码/沙箱环境需要 `clink auth secret set` 支持无浏览器 Secret Key 认证：
+不要使用 `node dist/index.js`。先安装并使用最新 `clink`。低代码/沙箱环境需要 CLI 支持 `clink auth secret set`，所以安装后必须检查命令能力：
 
 ```bash
 npm install -g github:5048429/clink-dev-cli
@@ -31,12 +31,6 @@ clink dashboard webhook ensure --help
 
 ```bash
 npm install --prefix ./.clink-tools github:5048429/clink-dev-cli
-```
-
-如果需要锁定版本，可以使用：
-
-```bash
-npm install -g github:5048429/clink-dev-cli#v0.1.1
 ```
 
 本地安装后：
@@ -52,7 +46,7 @@ npm install -g github:5048429/clink-dev-cli#v0.1.1
 - `clink dashboard webhook ensure --help` 必须支持 `--save-secret`
 - 如果需要把 webhook signing key 写入低代码/云平台 Secret，`clink dashboard webhook ensure --help` 还应支持 `--show-secret`
 
-如果普通安装拿到的 CLI 过旧，不支持 `auth secret set`，请更新到包含 dashboardless Secret Key auth 的最新版 GitHub 分支/标签后再继续。不要因为旧 CLI 缺少能力就直接把 webhook 配置交给用户。
+如果普通安装拿到的 CLI 过旧，不支持 `auth secret set`，请重新安装/更新最新 CLI 后再继续。不要因为旧 CLI 缺少能力就直接把 webhook 配置交给用户。
 
 ## 登录与密钥
 
