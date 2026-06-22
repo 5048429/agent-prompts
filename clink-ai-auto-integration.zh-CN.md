@@ -22,7 +22,6 @@
 
 ```bash
 npm install -g github:5048429/clink-dev-cli
-clink --version
 clink auth secret set --help
 clink dashboard webhook ensure --help
 ```
@@ -81,7 +80,7 @@ clink auth status --json
 1. 明确提示我去 ClinkBill UAT Dashboard 登录并复制 Secret Key。
 2. 我把 Secret Key 发给你后，你把它只写入安全的服务端环境变量、平台 Secret 或本地 `.env`。
 3. 只向我索取 `CLINK_SECRET_KEY`。不要在这一步向我索取 `CLINK_WEBHOOK_SIGNING_KEY`，也不要让我手动复制 webhook signing key。
-4. 使用当前 `clink-dev-cli` 支持的 Secret Key 配置方式保存本地 profile；如果命令参数不确定，先运行：
+4. 使用当前 `clink` CLI 支持的 Secret Key 配置方式保存本地 profile；如果命令参数不确定，先运行：
 
 ```bash
 clink auth secret set --help

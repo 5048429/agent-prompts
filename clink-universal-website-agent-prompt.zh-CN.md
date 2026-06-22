@@ -43,7 +43,7 @@ https://raw.githubusercontent.com/5048429/agent-prompts/main/clink-ai-auto-integ
 
 7. webhook 自动配置要求：
    - 不要把“Dashboard webhook endpoint（请你配置）”作为默认交付结果。
-   - 你应先安装/更新到支持 dashboardless Secret Key auth 的最新版 `clink-dev-cli`，并验证 `clink auth secret set --help` 可用。
+   - 你应先安装/更新最新 `clink` CLI，并验证 `clink auth secret set --help` 可用。
    - 在低代码/云平台已有公网域名时，你应运行 `clink dashboard webhook ensure --url <PUBLIC_WEBHOOK_URL> --events core --save-secret --show-secret --json`。
    - 然后把命令得到的 webhook signing key 写入平台 Secret：`CLINK_WEBHOOK_SIGNING_KEY`，并重新部署/重启。
    - 不要让我手动创建 webhook，也不要让我把 webhook signing key 复制给你，除非自动配置已经尝试失败并明确说明原因。
