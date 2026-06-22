@@ -24,6 +24,7 @@
 npm install -g github:5048429/clink-dev-cli
 clink auth secret set --help
 clink api request --help
+clink catalog import --help
 clink dashboard webhook ensure --help
 ```
 
@@ -44,6 +45,7 @@ npm install --prefix ./.clink-tools github:5048429/clink-dev-cli
 
 - 必须支持 `clink auth secret set --api-key env:CLINK_SECRET_KEY --env sandbox`
 - 应支持 `clink api request`，用于调用当前官方 OpenAPI 中尚未被专用 CLI 命令封装的公开 API path
+- 如果当前网站已有付费产品、订阅套餐或价格页，应支持 `clink catalog validate --help` / `clink catalog import --help`。产品扫描由 agent 完成，CLI 负责验证、计划、导入并保存 sourceId 映射，不要让用户手动复制 productId/priceId。
 - `clink dashboard webhook ensure --help` 必须支持 `--save-secret`
 - 如果需要把 webhook signing key 写入低代码/云平台 Secret，`clink dashboard webhook ensure --help` 还应支持 `--show-secret`
 
@@ -193,6 +195,22 @@ Content-Type: application/json
 
 不要把 `CLINK_SECRET_KEY` 暴露到浏览器。前端只能调用自己后端的 API。
 
+## Product catalog
+
+如果当前网站、CMS、源码或价格页已经存在付费产品、一次性购买项、订阅套餐或多币种/多周期价格，先由 agent 扫描这些来源，生成确定性的 `clink-catalog.json`，再交给 CLI 导入。不要把“扫描网站”放进 CLI；CLI 的职责是验证、预览计划、调用官方 Product/Price API 并维护本地映射。
+
+推荐流程：
+
+```bash
+clink catalog validate --file ./clink-catalog.json --json
+clink catalog plan --file ./clink-catalog.json --mapping-file ./.clink/catalog-map.json --json
+clink catalog import --file ./clink-catalog.json --mapping-file ./.clink/catalog-map.json --json
+```
+
+生成 catalog 时，每个 product 和 price 必须有稳定 `sourceId`，来源可以是站点 slug、SKU、CMS ID、路由名或 agent 生成后可重复的 slug。重复运行时，CLI 会用 mapping 文件跳过已导入的 product/price，避免重复创建。
+
+如果只是临时创建一个测试订阅套餐，仍可使用 `clink product create`；但对于真实网站上已有的多个付费产品/订阅产品，优先使用 `clink catalog`。
+
 ## Checkout
 
 必须支持：
@@ -269,7 +287,7 @@ POST /api/clink/subscription
 POST /subscription
 ```
 
-如果需要 product/price，请用 CLI 自动创建，不要让我手动找 ID：
+如果需要单个临时 product/price，请用 CLI 自动创建，不要让我手动找 ID。若网站已经有多个付费产品或订阅套餐，请优先回到 `Product catalog` 流程批量导入：
 
 ```bash
 clink product create \

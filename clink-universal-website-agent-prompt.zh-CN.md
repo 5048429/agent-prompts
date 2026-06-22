@@ -27,6 +27,7 @@ https://raw.githubusercontent.com/5048429/agent-prompts/main/clink-ai-auto-integ
 3. 必须实现：
    - 创建 checkout session 的服务端接口
    - 创建 subscription 的服务端接口
+   - 如果网站已有价格页、付费产品或订阅套餐，先由你扫描这些产品并生成 `clink-catalog.json`，再用 `clink catalog validate/plan/import` 创建 Clink product/price；不要让我手动复制 productId/priceId
    - webhook 接收接口，并使用 raw body 校验签名
    - 本地启动/验证方式
    - curl 示例
@@ -43,7 +44,7 @@ https://raw.githubusercontent.com/5048429/agent-prompts/main/clink-ai-auto-integ
 
 7. webhook 自动配置要求：
    - 不要把“Dashboard webhook endpoint（请你配置）”作为默认交付结果。
-   - 你应先安装/更新最新 `clink` CLI，并验证 `clink auth secret set --help`、`clink api request --help` 可用。
+   - 你应先安装/更新最新 `clink` CLI，并验证 `clink auth secret set --help`、`clink api request --help`、`clink catalog import --help` 可用。
    - 在低代码/云平台已有公网域名时，优先检查当前官方 API / CLI 是否支持用 `CLINK_SECRET_KEY` 管理 webhook endpoint；如果支持，自动创建/更新 webhook 并把 signing key 写入平台 Secret：`CLINK_WEBHOOK_SIGNING_KEY`，再重新部署/重启。
    - 如果当前 CLI 明确说明 webhook endpoint management 仍是 Dashboard-only，需要 Dashboard Console token，则不要假装自动配置完成；请说明这是官方 API 能力边界，并让我在本地运行 `clink login` 或在 Dashboard 手工配置 webhook。
    - 不要让我手动创建 webhook，也不要让我把 webhook signing key 复制给你，除非自动配置已经尝试失败，或当前官方 API / CLI 明确不支持无浏览器 webhook management。
