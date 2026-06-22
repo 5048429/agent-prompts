@@ -18,11 +18,13 @@
 
 ## 安装 CLI
 
-不要使用 `node dist/index.js`。先安装并使用 `clink`：
+不要使用 `node dist/index.js`。先安装并使用 `clink`。必须使用 `clink-dev-cli` 0.1.1 或更高版本，因为低代码/沙箱环境需要 `clink auth secret set` 支持无浏览器 Secret Key 认证：
 
 ```bash
 npm install -g github:5048429/clink-dev-cli
 clink --version
+clink auth secret set --help
+clink dashboard webhook ensure --help
 ```
 
 如果全局安装失败：
@@ -31,12 +33,26 @@ clink --version
 npm install --prefix ./.clink-tools github:5048429/clink-dev-cli
 ```
 
+如果需要锁定版本，可以使用：
+
+```bash
+npm install -g github:5048429/clink-dev-cli#v0.1.1
+```
+
 本地安装后：
 
 - Linux/macOS: `./.clink-tools/node_modules/.bin/clink`
 - Windows PowerShell: `.\.clink-tools\node_modules\.bin\clink.cmd`
 
 下文统一写 `clink`，如果使用本地安装，请自动替换成对应路径。
+
+不要依赖环境里预装的旧版 `clink`。安装后必须检查命令能力：
+
+- 必须支持 `clink auth secret set --api-key env:CLINK_SECRET_KEY --env sandbox`
+- `clink dashboard webhook ensure --help` 必须支持 `--save-secret`
+- 如果需要把 webhook signing key 写入低代码/云平台 Secret，`clink dashboard webhook ensure --help` 还应支持 `--show-secret`
+
+如果普通安装拿到的 CLI 过旧，不支持 `auth secret set`，请更新到包含 dashboardless Secret Key auth 的最新版 GitHub 分支/标签后再继续。不要因为旧 CLI 缺少能力就直接把 webhook 配置交给用户。
 
 ## 登录与密钥
 
@@ -74,12 +90,13 @@ clink auth status --json
 4. 使用当前 `clink-dev-cli` 支持的 Secret Key 配置方式保存本地 profile；如果命令参数不确定，先运行：
 
 ```bash
-clink auth set --help
+clink auth secret set --help
 ```
 
 5. 配置完成后运行：
 
 ```bash
+clink auth secret set --api-key env:CLINK_SECRET_KEY --env sandbox
 clink auth status --json
 clink doctor --json
 ```
@@ -90,6 +107,7 @@ clink doctor --json
 
 - `CLINK_WEBHOOK_SIGNING_KEY` 不应在初始接入时向用户索取。
 - webhook signing key 应由 `clink dashboard webhook ensure --save-secret --json` 自动创建/获取并保存。
+- 如果需要把 webhook signing key 写入低代码/云平台 Secret，agent 应使用 `clink dashboard webhook ensure --save-secret --show-secret --json` 获取明文 signing key，并立即写入平台 Secret；不要在最终回复或公开日志中展示该值。
 - 如果低代码/云平台要求部署前必须填写所有 Secret，可以先放一个临时占位值，例如 `will_be_set_after_webhook_ensure`，但必须在 webhook ensure 成功后用真实 signing key 覆盖并重新部署/重启。
 - 只有当 CLI 或平台能力确实无法自动配置 Dashboard webhook，并且你已经尝试失败并说明原因后，才可以把“手动提供 webhook signing key”作为最后兜底步骤。
 - 不要给用户同时索取 `CLINK_SECRET_KEY` 和 `CLINK_WEBHOOK_SIGNING_KEY` 的表单或消息。正确说法是：先提供 `CLINK_SECRET_KEY`，webhook signing key 我会在配置 Dashboard webhook 后自动写入。
@@ -374,7 +392,33 @@ clink dashboard webhook ensure \
 
 `ensure --save-secret` 成功后，从 CLI profile 或命令结果中获取最新 webhook signing key，自动写入项目运行环境的 `CLINK_WEBHOOK_SIGNING_KEY` / 平台 Secret，然后重启或重新部署服务。
 
+如果当前环境是低代码编辑器/云 IDE/sandbox，且 agent 有写入平台 Secret 的工具或 API，请直接执行完整自动流程：
+
+1. 部署或发布包含 webhook endpoint 的站点，拿到公网 HTTPS URL。
+2. 运行：
+
+```bash
+clink dashboard webhook ensure \
+  --url https://example.com/api/clink/webhook \
+  --events core \
+  --save-secret \
+  --show-secret \
+  --json
+```
+
+3. 从命令输出中读取明文 signing key，写入平台 Secret：`CLINK_WEBHOOK_SIGNING_KEY=<signing key>`。
+4. 重新部署/重启服务，让 webhook handler 使用最新 Secret。
+5. 使用 `clink webhook simulate` 或等价方式验证 webhook 返回 200。
+
+不要把第 2 步得到的 signing key 发给用户让用户再转发给你；这是 agent 应自动完成的步骤。也不要在最终交付中写“Dashboard webhook endpoint（请你配置）”，除非 CLI 自动配置和平台 Secret 写入能力都已尝试失败。
+
 如果平台需要重新部署后函数才生效，先部署，再配置 webhook，再写入 signing key 并重新部署。每次域名、预览 URL 或 webhook path 变化后，都要重新运行 `clink dashboard webhook ensure --save-secret --json`，同步新的 webhook signing key 到项目运行环境，并重启/重新部署服务。
+
+如果 `clink dashboard webhook ensure` 报错说需要 Dashboard Console token 或不接受当前 Secret Key：
+
+1. 先确认是否使用了支持 dashboardless Secret Key auth 的最新版 CLI；旧版 CLI 常会误判为必须 `clink login`。
+2. 重新安装/更新 CLI 后重试。
+3. 如果最新版 CLI 仍然无法用 Secret Key 自动配置 Dashboard webhook，才把它作为工具能力阻塞报告给用户，并说明需要升级 CLI/开放 webhook endpoint public API/或使用本地浏览器登录一次。不要直接要求用户手工创建 webhook 或手工复制 webhook signing key，除非这是最后兜底且用户明确接受。
 
 ### 路径 B：纯本地环境，没有公网域名
 
