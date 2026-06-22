@@ -2,7 +2,7 @@
 
 帮我把 ClinkBill 支付接入到当前项目。
 
-目标：尽量全自动完成 UAT 支付接入。唯一允许人工介入的是：你运行 `clink login` 后，我在打开的 Dashboard 登录页里手动完成登录。除此之外，不要让我手动复制 Secret Key、productId、priceId、webhook signing key，或手动配置 Dashboard webhook。
+目标：尽量全自动完成 UAT 支付接入。优先使用 CLI 自动化；如果运行环境没有可用浏览器或无法完成 Dashboard 登录，允许让我在 ClinkBill Dashboard 自己登录后，把 Secret Key 提供给 agent，由 agent 写入安全的服务端环境变量或平台 Secret。除此之外，不要让我手动复制 productId、priceId、webhook signing key，或手动配置 Dashboard webhook，除非当前 CLI/平台能力确实无法自动完成，并且你已明确说明原因。
 
 请保持真实、可验证：如果没有人打开 `checkoutUrl` 并完成 UAT 测试支付，不要把“真实 checkout session 创建成功 + 签名模拟 webhook 通过”说成“真实付款全链路完成”。
 
@@ -40,13 +40,17 @@ npm install --prefix ./.clink-tools github:5048429/clink-dev-cli
 
 ## 登录与密钥
 
-运行：
+根据运行环境选择认证方式。
+
+### 路径 A：本地/桌面环境，有可用浏览器
+
+优先运行：
 
 ```bash
 clink login
 ```
 
-如果 CLI 没有自动完成登录，请暂停并提示我：
+如果 CLI 打开了 Dashboard 登录页，请暂停并提示我：
 
 ```text
 请在打开的浏览器里完成 ClinkBill UAT Dashboard 登录。登录完成后告诉我继续。
@@ -59,6 +63,27 @@ clink dashboard whoami --json
 clink dashboard apikey ensure-secret --save --json
 clink auth status --json
 ```
+
+### 路径 B：云环境/沙箱/无浏览器环境
+
+如果 `clink login` 无法打开浏览器、无法捕获登录态，或当前是在低代码/云 IDE/sandbox 中运行，请不要卡死在登录流程。改用手动 Secret Key 兜底：
+
+1. 明确提示我去 ClinkBill UAT Dashboard 登录并复制 Secret Key。
+2. 我把 Secret Key 发给你后，你把它只写入安全的服务端环境变量、平台 Secret 或本地 `.env`。
+3. 使用当前 `clink-dev-cli` 支持的 Secret Key 配置方式保存本地 profile；如果命令参数不确定，先运行：
+
+```bash
+clink auth set --help
+```
+
+4. 配置完成后运行：
+
+```bash
+clink auth status --json
+clink doctor --json
+```
+
+手动 Secret Key 是无浏览器环境的允许人工步骤。仍然必须遵守密钥保护规则：不要把真实 Secret Key 写入源码、README、测试 fixture、前端变量、公开日志或最终回复。
 
 如果项目需要 `.env`，可以用 CLI 获取真实 key 并写入 `.env`，但必须：
 
@@ -309,7 +334,39 @@ X-Clink-Signature
 
 ## 自动配置 Dashboard webhook
 
-本地测试必须使用 HTTPS tunnel，优先 cloudflared，不要用 localtunnel。
+先判断当前项目是否已经有公网 HTTPS 域名。不要默认所有环境都走 tunnel。
+
+### 路径 A：已有公网 HTTPS 域名
+
+如果项目已经部署在可公网访问的 HTTPS 域名上，例如：
+
+- 低代码编辑器/云 IDE/沙箱环境自动生成的预览域名
+- Vercel/Netlify/Cloudflare Pages/Render/Railway/Fly.io 等部署域名
+- 客户自己已有的网站域名
+
+则直接使用该域名配置 webhook，不要再额外创建 cloudflared tunnel。
+
+先确认 webhook endpoint 的完整地址，例如：
+
+```text
+https://example.com/api/clink/webhook
+```
+
+然后运行：
+
+```bash
+clink dashboard webhook ensure \
+  --url https://example.com/api/clink/webhook \
+  --events core \
+  --save-secret \
+  --json
+```
+
+如果平台需要重新部署后函数才生效，先部署，再配置 webhook。每次域名、预览 URL 或 webhook path 变化后，都要重新运行 `clink dashboard webhook ensure --save-secret --json`，同步新的 webhook signing key 到项目运行环境，并重启/重新部署服务。
+
+### 路径 B：纯本地环境，没有公网域名
+
+只有在服务仅运行在 `localhost` / `127.0.0.1` 且没有公网 HTTPS URL 时，才使用 HTTPS tunnel。优先 cloudflared，不要用 localtunnel。
 
 Windows 如果没有 cloudflared，可以尝试：
 
@@ -329,7 +386,7 @@ cloudflared tunnel --url http://127.0.0.1:<PORT> --no-autoupdate
 cloudflared tunnel --url http://127.0.0.1:<PORT> --no-autoupdate --protocol http2
 ```
 
-得到公网 URL 后运行：
+得到公网 URL 后运行，注意 path 要使用当前项目真实 webhook route：
 
 ```bash
 clink dashboard webhook ensure \
@@ -348,7 +405,7 @@ clink dashboard webhook ensure \
 - `subscription.created`
 - `invoice.paid`
 
-重要：每次 quick tunnel URL 变化后，都要重新运行 `clink dashboard webhook ensure --save-secret --json`，同步新的 webhook signing key 到 `.env`，并重启本地服务。
+重要：无论使用已有域名还是 cloudflared tunnel，每次 webhook URL 变化后，都要重新运行 `clink dashboard webhook ensure --save-secret --json`。运行后必须同步最新 webhook signing key 到 `.env`、平台 Secret 或服务端环境变量，并重启/重新部署服务。
 
 ## 验证
 
@@ -466,7 +523,8 @@ curl -X POST http://localhost:3000/api/clink/subscription \
 
 预期剩余人工步骤只能是：
 
-- 我在 `clink login` 打开的 Dashboard 页面里手动登录
+- 本地/桌面环境：我在 `clink login` 打开的 Dashboard 页面里手动登录
+- 云环境/沙箱/无浏览器环境：我在 ClinkBill Dashboard 自己登录并把 Secret Key 提供给 agent
 - 如需验证真实付款 webhook，我手动打开 `checkoutUrl` 完成 UAT 测试支付
 
 如果启动了临时服务或 tunnel：

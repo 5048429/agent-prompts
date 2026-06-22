@@ -9,7 +9,13 @@
 https://raw.githubusercontent.com/5048429/agent-prompts/main/clink-ai-auto-integration.zh-CN.md
 
 目标：
-尽量全自动完成 ClinkBill UAT 支付接入。除了你运行 `clink login` 后，需要我在打开的 Dashboard 登录页里手动完成登录之外，不要让我手动复制 Secret Key、productId、priceId、webhook signing key，或手动配置 Dashboard webhook。
+尽量全自动完成 ClinkBill UAT 支付接入。
+
+认证方式请按环境选择：
+- 如果你在本地/桌面环境运行，并且可以打开浏览器，请优先运行 `clink login`，让我在打开的 Dashboard 登录页里手动完成登录。
+- 如果你在云 IDE、低代码编辑器、sandbox 或其他没有可用浏览器的环境运行，不要卡在 `clink login`。请让我自己登录 ClinkBill Dashboard 后把 Secret Key 提供给你，然后你把它只写入安全的服务端环境变量、平台 Secret 或本地 `.env`。
+
+除了上述认证步骤，不要让我手动复制 productId、priceId、webhook signing key，或手动配置 Dashboard webhook，除非当前 CLI/平台能力确实无法自动完成，并且你已明确说明原因。
 
 重要要求：
 
@@ -29,7 +35,12 @@ https://raw.githubusercontent.com/5048429/agent-prompts/main/clink-ai-auto-integ
 
 5. 每次运行 `clink dashboard webhook ensure --save-secret` 后，必须同步最新 webhook signing key 到项目运行环境，并重启服务，否则 webhook 验签会失败。
 
-6. 请明确区分：
+6. webhook URL 选择策略：
+   - 如果当前网站已有公网 HTTPS 域名，包括低代码编辑器/云 IDE/sandbox 自动生成的预览域名，或客户自己已有域名，请直接使用该域名配置 Dashboard webhook。
+   - 只有纯本地 `localhost` / `127.0.0.1` 环境才需要 cloudflared tunnel。
+   - 不要在已有公网域名的情况下额外创建 tunnel。
+
+7. 请明确区分：
    - 本地 mock 测试
    - 签名模拟 webhook 测试
    - 真实 UAT checkout session 创建成功
@@ -53,4 +64,3 @@ https://raw.githubusercontent.com/5048429/agent-prompts/main/clink-ai-auto-integ
 
 如果你无法访问 GitHub raw 文件，请先停止并告诉我需要提供完整提示词内容，不要凭记忆或猜测接入。
 ```
-
