@@ -70,13 +70,14 @@ clink auth status --json
 
 1. 明确提示我去 ClinkBill UAT Dashboard 登录并复制 Secret Key。
 2. 我把 Secret Key 发给你后，你把它只写入安全的服务端环境变量、平台 Secret 或本地 `.env`。
-3. 使用当前 `clink-dev-cli` 支持的 Secret Key 配置方式保存本地 profile；如果命令参数不确定，先运行：
+3. 只向我索取 `CLINK_SECRET_KEY`。不要在这一步向我索取 `CLINK_WEBHOOK_SIGNING_KEY`，也不要让我手动复制 webhook signing key。
+4. 使用当前 `clink-dev-cli` 支持的 Secret Key 配置方式保存本地 profile；如果命令参数不确定，先运行：
 
 ```bash
 clink auth set --help
 ```
 
-4. 配置完成后运行：
+5. 配置完成后运行：
 
 ```bash
 clink auth status --json
@@ -84,6 +85,14 @@ clink doctor --json
 ```
 
 手动 Secret Key 是无浏览器环境的允许人工步骤。仍然必须遵守密钥保护规则：不要把真实 Secret Key 写入源码、README、测试 fixture、前端变量、公开日志或最终回复。
+
+**Webhook signing key 规则（硬规则）**：
+
+- `CLINK_WEBHOOK_SIGNING_KEY` 不应在初始接入时向用户索取。
+- webhook signing key 应由 `clink dashboard webhook ensure --save-secret --json` 自动创建/获取并保存。
+- 如果低代码/云平台要求部署前必须填写所有 Secret，可以先放一个临时占位值，例如 `will_be_set_after_webhook_ensure`，但必须在 webhook ensure 成功后用真实 signing key 覆盖并重新部署/重启。
+- 只有当 CLI 或平台能力确实无法自动配置 Dashboard webhook，并且你已经尝试失败并说明原因后，才可以把“手动提供 webhook signing key”作为最后兜底步骤。
+- 不要给用户同时索取 `CLINK_SECRET_KEY` 和 `CLINK_WEBHOOK_SIGNING_KEY` 的表单或消息。正确说法是：先提供 `CLINK_SECRET_KEY`，webhook signing key 我会在配置 Dashboard webhook 后自动写入。
 
 如果项目需要 `.env`，可以用 CLI 获取真实 key 并写入 `.env`，但必须：
 
@@ -99,6 +108,7 @@ clink doctor --json
 CLINK_ENV=sandbox
 CLINK_BASE_URL=https://uat-api.clinkbill.com/api/
 CLINK_SECRET_KEY=sk_uat_xxx
+# 由 agent 在 clink dashboard webhook ensure --save-secret 后自动写入；不要让用户初始手动提供
 CLINK_WEBHOOK_SIGNING_KEY=whsec_xxx
 CLINK_SUBSCRIPTION_PRODUCT_ID=prod_xxx
 CLINK_SUBSCRIPTION_PRICE_ID=price_xxx
@@ -352,7 +362,7 @@ X-Clink-Signature
 https://example.com/api/clink/webhook
 ```
 
-然后运行：
+如果当前平台要求先部署后才能得到域名，先部署包含 webhook endpoint 的版本。此时 `CLINK_WEBHOOK_SIGNING_KEY` 可以暂时为空或使用占位值；不要因此向用户索取 webhook signing key。然后运行：
 
 ```bash
 clink dashboard webhook ensure \
@@ -362,7 +372,9 @@ clink dashboard webhook ensure \
   --json
 ```
 
-如果平台需要重新部署后函数才生效，先部署，再配置 webhook。每次域名、预览 URL 或 webhook path 变化后，都要重新运行 `clink dashboard webhook ensure --save-secret --json`，同步新的 webhook signing key 到项目运行环境，并重启/重新部署服务。
+`ensure --save-secret` 成功后，从 CLI profile 或命令结果中获取最新 webhook signing key，自动写入项目运行环境的 `CLINK_WEBHOOK_SIGNING_KEY` / 平台 Secret，然后重启或重新部署服务。
+
+如果平台需要重新部署后函数才生效，先部署，再配置 webhook，再写入 signing key 并重新部署。每次域名、预览 URL 或 webhook path 变化后，都要重新运行 `clink dashboard webhook ensure --save-secret --json`，同步新的 webhook signing key 到项目运行环境，并重启/重新部署服务。
 
 ### 路径 B：纯本地环境，没有公网域名
 

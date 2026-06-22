@@ -14,6 +14,7 @@ https://raw.githubusercontent.com/5048429/agent-prompts/main/clink-ai-auto-integ
 认证方式请按环境选择：
 - 如果你在本地/桌面环境运行，并且可以打开浏览器，请优先运行 `clink login`，让我在打开的 Dashboard 登录页里手动完成登录。
 - 如果你在云 IDE、低代码编辑器、sandbox 或其他没有可用浏览器的环境运行，不要卡在 `clink login`。请让我自己登录 ClinkBill Dashboard 后把 Secret Key 提供给你，然后你把它只写入安全的服务端环境变量、平台 Secret 或本地 `.env`。
+- 无浏览器环境下，只能先向我索取 `CLINK_SECRET_KEY`。不要向我索取 `CLINK_WEBHOOK_SIGNING_KEY`；webhook signing key 应该在你配置 Dashboard webhook 后自动生成/保存，再由你写入平台 Secret。
 
 除了上述认证步骤，不要让我手动复制 productId、priceId、webhook signing key，或手动配置 Dashboard webhook，除非当前 CLI/平台能力确实无法自动完成，并且你已明确说明原因。
 
@@ -33,7 +34,7 @@ https://raw.githubusercontent.com/5048429/agent-prompts/main/clink-ai-auto-integ
 
 4. Clink Secret Key、Webhook Signing Key 等真实密钥只能写入本地环境变量或平台 Secret，不能写入源码、README、前端变量、测试 fixture 或最终回复。
 
-5. 每次运行 `clink dashboard webhook ensure --save-secret` 后，必须同步最新 webhook signing key 到项目运行环境，并重启服务，否则 webhook 验签会失败。
+5. 每次运行 `clink dashboard webhook ensure --save-secret` 后，必须同步最新 webhook signing key 到项目运行环境，并重启服务，否则 webhook 验签会失败。低代码/云平台如果要求部署前填写 `CLINK_WEBHOOK_SIGNING_KEY`，可以先用占位值部署 webhook endpoint，再运行 webhook ensure，随后用真实 signing key 覆盖并重新部署；不要因此让我手动提供 webhook signing key。
 
 6. webhook URL 选择策略：
    - 如果当前网站已有公网 HTTPS 域名，包括低代码编辑器/云 IDE/sandbox 自动生成的预览域名，或客户自己已有域名，请直接使用该域名配置 Dashboard webhook。
