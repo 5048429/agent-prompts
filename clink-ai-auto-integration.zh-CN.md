@@ -24,17 +24,38 @@ $clink-integ-skills
 
 ## CLI
 
-安装并使用最新 `clink-dev-cli`：
+安装并使用最新 `clink-dev-cli`。Agent 默认安装到项目本地，避免全局 npm 目录权限、旧版本残留或 Windows junction 文件锁问题：
 
 ```bash
-npm install -g github:5048429/clink-dev-cli
+npm install --prefix ./.clink-tools github:5048429/clink-dev-cli
+./.clink-tools/node_modules/.bin/clink auth secret set --help
+./.clink-tools/node_modules/.bin/clink api request --help
+./.clink-tools/node_modules/.bin/clink catalog import --help
+./.clink-tools/node_modules/.bin/clink webhook endpoint ensure --help
+```
+
+Windows PowerShell 使用：
+
+```powershell
+.\.clink-tools\node_modules\.bin\clink.cmd auth secret set --help
+.\.clink-tools\node_modules\.bin\clink.cmd api request --help
+.\.clink-tools\node_modules\.bin\clink.cmd catalog import --help
+.\.clink-tools\node_modules\.bin\clink.cmd webhook endpoint ensure --help
+```
+
+如果你确认当前机器全局 npm 可用，也可以全局安装；全局安装必须带 `--install-links=true`：
+
+```bash
+npm install -g --install-links=true github:5048429/clink-dev-cli
 clink auth secret set --help
 clink api request --help
 clink catalog import --help
 clink webhook endpoint ensure --help
 ```
 
-如果全局安装失败，可以本地安装：
+如果安装失败，请说明脱敏错误，不要因为缺少 Node 类型声明就在业务项目里补 TypeScript 构建依赖。GitHub 安装应使用 CLI 仓库已提交的 `dist/` 产物。
+
+如果需要重试，请仍优先使用本地安装：
 
 ```bash
 npm install --prefix ./.clink-tools github:5048429/clink-dev-cli

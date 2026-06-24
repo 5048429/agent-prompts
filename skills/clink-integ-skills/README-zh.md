@@ -13,7 +13,15 @@
 本地桌面环境里，如果用户还没有提供 Secret Key，且 agent 可以打开浏览器，可以运行：
 
 ```bash
-npm install -g github:5048429/clink-dev-cli
+npm install --prefix ./.clink-tools github:5048429/clink-dev-cli
+./.clink-tools/node_modules/.bin/clink --version
+./.clink-tools/node_modules/.bin/clink --help
+```
+
+如果明确要使用全局 npm，请带上 `--install-links=true`：
+
+```bash
+npm install -g --install-links=true github:5048429/clink-dev-cli
 clink login
 clink dashboard whoami --json
 clink dashboard apikey ensure-secret --save --json
@@ -25,7 +33,7 @@ clink auth status --json
 云环境、低代码、sandbox 或无浏览器环境里，用户只需要提供一次 `CLINK_SECRET_KEY`，然后 agent 配置 CLI：
 
 ```bash
-npm install -g github:5048429/clink-dev-cli
+npm install --prefix ./.clink-tools github:5048429/clink-dev-cli
 export CLINK_SECRET_KEY=sk_test_xxx
 clink auth secret set --api-key env:CLINK_SECRET_KEY --env sandbox
 clink auth status --json

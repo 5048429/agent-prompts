@@ -22,22 +22,15 @@ The current operational sources are:
 - `https://github.com/5048429/agent-prompts`
 - official API docs from `https://docs.clinkbill.com/`
 
-Install the CLI from GitHub, not from npm registry, unless the user has confirmed another release channel:
-
-```bash
-npm install -g github:5048429/clink-dev-cli
-clink --version
-clink auth secret set --help
-clink api request --help
-clink catalog import --help
-clink webhook endpoint ensure --help
-```
-
-If global install is unavailable, install locally:
+Install the CLI from GitHub, not from npm registry, unless the user has confirmed another release channel. For agents, sandboxes, CI, and low-code runtimes, prefer a project-local tools directory:
 
 ```bash
 npm install --prefix ./.clink-tools github:5048429/clink-dev-cli
-./.clink-tools/node_modules/.bin/clink --help
+./.clink-tools/node_modules/.bin/clink --version
+./.clink-tools/node_modules/.bin/clink auth secret set --help
+./.clink-tools/node_modules/.bin/clink api request --help
+./.clink-tools/node_modules/.bin/clink catalog import --help
+./.clink-tools/node_modules/.bin/clink webhook endpoint ensure --help
 ```
 
 Windows PowerShell local binary:
@@ -45,6 +38,19 @@ Windows PowerShell local binary:
 ```powershell
 .\.clink-tools\node_modules\.bin\clink.cmd --help
 ```
+
+Global install is optional for developer machines where global npm is known to work. Use `--install-links=true` to avoid broken global junctions that some npm/Windows combinations create for GitHub dependencies:
+
+```bash
+npm install -g --install-links=true github:5048429/clink-dev-cli
+clink --version
+clink auth secret set --help
+clink api request --help
+clink catalog import --help
+clink webhook endpoint ensure --help
+```
+
+GitHub installs should use the committed `dist/` output from the CLI repo. Do not add TypeScript build dependencies to the merchant project just because a GitHub install reports missing Node type declarations.
 
 ## Authentication
 

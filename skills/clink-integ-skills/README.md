@@ -13,7 +13,15 @@ Normal integration no longer needs a Dashboard Console token after the Secret Ke
 In a local desktop environment, when no Secret Key has been provided and a browser is available, the agent may run:
 
 ```bash
-npm install -g github:5048429/clink-dev-cli
+npm install --prefix ./.clink-tools github:5048429/clink-dev-cli
+./.clink-tools/node_modules/.bin/clink --version
+./.clink-tools/node_modules/.bin/clink --help
+```
+
+If you intentionally use global npm, include `--install-links=true`:
+
+```bash
+npm install -g --install-links=true github:5048429/clink-dev-cli
 clink login
 clink dashboard whoami --json
 clink dashboard apikey ensure-secret --save --json
@@ -25,7 +33,7 @@ The human only completes Dashboard login in the opened browser. The CLI then fin
 In cloud, low-code, sandbox, or browserless environments, the user provides `CLINK_SECRET_KEY` once, then the agent configures the CLI:
 
 ```bash
-npm install -g github:5048429/clink-dev-cli
+npm install --prefix ./.clink-tools github:5048429/clink-dev-cli
 export CLINK_SECRET_KEY=sk_test_xxx
 clink auth secret set --api-key env:CLINK_SECRET_KEY --env sandbox
 clink auth status --json
