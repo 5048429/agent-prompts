@@ -1,7 +1,14 @@
 # Agent Prompts
 
+## 官方说明
+
+- [ClinkBill AI 自动接入介绍](./docs/clinkbill-ai-auto-integration.zh-CN.md)
+- [一段式建站 Agent 提示词](./clink-universal-website-agent-prompt.zh-CN.md)
+- [无 skill 环境 fallback 详细规则](./clink-ai-auto-integration.zh-CN.md)
+
 这个仓库是 ClinkBill 支付接入的 agent 分发包，包含：
 
+- `docs/clinkbill-ai-auto-integration.zh-CN.md`：ClinkBill AI 自动接入官方说明
 - `skills/clink-integ-skills`：可安装/可读取的 Clink 支付接入 skill
 - `clink-universal-website-agent-prompt.zh-CN.md`：复制给任意建站 agent 的一段式提示词
 - `clink-ai-auto-integration.zh-CN.md`：不支持 skill 时使用的 fallback 详细规则
