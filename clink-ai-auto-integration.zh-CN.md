@@ -2,16 +2,16 @@
 
 帮我把 ClinkBill 支付接入到当前项目。
 
-如果你支持 skills，请优先使用：
-
-```text
-$clink-integ-skills
-```
-
-skill 来源：
+如果你支持 skills，请先安装或读取 skill，然后立即使用它完成接入，不要要求用户再发送第二段提示词：
 
 ```text
 https://github.com/5048429/agent-prompts/tree/main/skills/clink-integ-skills
+```
+
+安装/读取后使用：
+
+```text
+$clink-integ-skills
 ```
 
 如果你不支持 skills，请严格遵守下面的 fallback 规则。
