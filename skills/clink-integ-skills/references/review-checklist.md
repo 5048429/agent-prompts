@@ -20,6 +20,9 @@ This file is for final review and self-check. It is not the primary workflow doc
 - did the design clarify registered vs non-registered product mode
 - for registered product mode, does it explain where active `productId` and `priceId` come from
 - when existing site products, prices, or subscriptions exist, does it use agent-discovered `clink-catalog.json` plus `clink catalog validate/plan/import` instead of manual ID copying
+- does product discovery inspect running APIs/pricing DOM before source/configuration, and ask the user only after those sources are exhausted
+- does the generated `clink-catalog.json` include one product image source per product: `imageId`, `imageUrl`, or `imageFile`
+- does it avoid putting URL strings in `imageId`, using `imageUrl` for URLs and `imageFile` for local public/static assets
 - for non-registered product mode, does it explain how merchant-defined line items are built into `priceDataList`
 - for non-registered product mode, does it keep merchant-specific business inputs in the merchant order model
 - for subscription purchases, does it explain whether the flow should create a new checkout session or route to customer portal
@@ -28,6 +31,7 @@ This file is for final review and self-check. It is not the primary workflow doc
 - does the design keep `originalAmount` aligned with the merchant-defined checkout payload
 - does webhook implementation include endpoint registration through `clink webhook endpoint ensure --events core --save-secret --json` or a clearly identified fallback
 - does webhook setup sync the returned or rotated signing secret into the merchant runtime as `CLINK_WEBHOOK_SIGNING_KEY`
+- for local `.env` apps, does webhook setup use `clink webhook endpoint ensure --save-secret --sync-env-file <env-file>` or an equivalent automated env write
 - does webhook setup restart or redeploy the service after syncing the signing secret
 - does webhook setup explain that URL changes require rerunning endpoint ensure and resyncing the signing secret
 - does the output avoid asking for `CLINK_WEBHOOK_SIGNING_KEY` as an initial user-provided secret
@@ -39,7 +43,9 @@ This file is for final review and self-check. It is not the primary workflow doc
 - does webhook coverage include subscription lifecycle events when the product mode is subscription-based
 - does webhook coverage include `order.refunded` or equivalent refunded-state handling when that state exists in the merchant order model
 - does webhook implementation include signature verification, idempotency, retry handling, and out-of-order tolerance
+- does webhook reconciliation match both `merchantReferenceId` and `sessionId` when both are available, and quarantine mismatches instead of relying on one field
 - does the design avoid treating `successUrl` as the only confirmation signal
+- does real-payment validation require local order paid/completed plus entitlement/fulfillment completion, not just webhook HTTP 200
 - does the design clearly separate payment confirmation from merchant fulfillment when downstream delivery exists
 - does refund handling describe lifecycle behavior instead of assuming unsupported create APIs
 

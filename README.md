@@ -22,7 +22,7 @@ https://github.com/5048429/agent-prompts/tree/main/skills/clink-integ-skills
 
 云环境、低代码、sandbox 或无浏览器环境：让我自己到 ClinkBill Dashboard 获取 CLINK_SECRET_KEY；我提供后，你把它写入安全的服务端环境变量、平台 Secret 或本地忽略的 .env，然后运行 clink auth secret set --api-key env:CLINK_SECRET_KEY --env sandbox。
 
-之后请自动扫描网站已有付费产品/订阅套餐，生成 clink-catalog.json，并用 clink catalog validate/plan/import 导入；实现 checkout/subscription 服务端接口和 webhook handler；用 clink webhook endpoint ensure --events core --save-secret --json 自动配置 webhook endpoint，并同步 CLINK_WEBHOOK_SIGNING_KEY 后重启/重新部署。
+之后请按“运行中 API/价格页 DOM > 源码/配置 > 询问用户”的顺序自动扫描网站已有付费产品/订阅套餐，生成 clink-catalog.json；每个 product 必须包含 imageId、imageUrl 或 imageFile 之一。用 clink catalog validate/plan/import 导入；实现 checkout/subscription 服务端接口和 webhook handler；用 clink webhook endpoint ensure --events core --save-secret --json 自动配置 webhook endpoint，并同步 CLINK_WEBHOOK_SIGNING_KEY 后重启/重新部署。本地 .env 项目优先使用 --sync-env-file。webhook handler 必须用 merchantReferenceId + sessionId 双重匹配订单；真实支付验收必须确认本地订单 paid/completed 和权益/发货等 fulfillment 完成，不能只看 webhook 200。
 
 如果你的运行环境不支持安装或读取 skill，请改为读取并遵守这份 fallback 规则：
 https://raw.githubusercontent.com/5048429/agent-prompts/main/clink-ai-auto-integration.zh-CN.md

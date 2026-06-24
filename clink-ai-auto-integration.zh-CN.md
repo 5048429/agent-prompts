@@ -124,14 +124,15 @@ clink doctor --json
 
 如果网站、CMS、数据库、源码或价格页已经存在付费产品、订阅套餐、价格、币种或计费周期：
 
-1. 由你扫描这些来源。
+1. 由你按“运行中的 API / 价格页 DOM / hydrated JSON > 源码 / 配置 / seed / public-static 资产 > 询问用户”的顺序扫描这些来源。
 2. 生成确定性的 `clink-catalog.json`，每个 product/price 都要有稳定 `sourceId`。
-3. 用 CLI 校验、预览并导入：
+3. 每个 product 必须包含且只包含一个图片来源：`imageId`、`imageUrl` 或 `imageFile`。URL 必须写 `imageUrl`，本地 public/static 图片写 `imageFile`，不要把 URL 写进 `imageId`。
+4. 用 CLI 校验、预览并导入：
 
 ```bash
-clink catalog validate --file ./clink-catalog.json --json
-clink catalog plan --file ./clink-catalog.json --mapping-file ./.clink/catalog-map.json --json
-clink catalog import --file ./clink-catalog.json --mapping-file ./.clink/catalog-map.json --json
+clink catalog validate --file ./clink-catalog.json --project-root . --public-dir public --json
+clink catalog plan --file ./clink-catalog.json --mapping-file ./.clink/catalog-map.json --project-root . --public-dir public --json
+clink catalog import --file ./clink-catalog.json --mapping-file ./.clink/catalog-map.json --project-root . --public-dir public --json
 ```
 
 不要让我手动复制 `productId` 或 `priceId`，除非 CLI/平台能力确实失败，并且你已说明原因。
@@ -164,7 +165,7 @@ Content-Type: application/json
 
 - 不要要求用户再到本地终端运行 `scripts/clink-bootstrap.sh` 来复制 `CLINK_WEBHOOK_SIGNING_KEY`。
 - 不要把“脚本会打印 signing key，请用户粘贴到平台 Secret”作为正常最终交付。
-- 先在 agent 环境安装项目内 CLI，并确认 `clink webhook endpoint ensure --help` 支持 `--show-secret`。
+- 先在 agent 环境安装项目内 CLI，并确认 `clink webhook endpoint ensure --help` 支持 `--show-secret` 和 `--sync-env-file`。
 - 使用平台已配置的 `CLINK_SECRET_KEY`，或在受控的一次性命令环境里让用户只提供 `CLINK_SECRET_KEY`，运行 `clink auth secret set --api-key env:CLINK_SECRET_KEY --env sandbox`。
 - 部署包含 webhook route 的版本，拿到公网 HTTPS webhook URL。
 - 运行 `clink webhook endpoint ensure --url <public-webhook-url>/api/clink/webhook --events core --save-secret --show-secret --json`。
@@ -180,6 +181,7 @@ clink webhook endpoint ensure \
   --url <public-webhook-url>/api/clink/webhook \
   --events core \
   --save-secret \
+  --sync-env-file .env.local \
   --json
 ```
 
@@ -200,6 +202,8 @@ clink webhook endpoint ensure \
 2. 重启或重新部署服务。
 3. 使用签名模拟 webhook 验证 handler。
 
+本地 `.env` 项目优先使用 `--sync-env-file <env-file>` 自动写入；只有平台 Secret 写入权限缺失时，才把写入 signing key 作为剩余人工步骤。
+
 每次 webhook URL、预览域名或 path 变化，都要重新运行 `ensure --save-secret --json`，重新同步 `CLINK_WEBHOOK_SIGNING_KEY` 并重启/重新部署。
 
 `clink dashboard webhook ensure` 只是兼容别名，新接入优先使用 `clink webhook endpoint ensure`。不要把 webhook endpoint 管理描述成 Dashboard-only。
@@ -217,6 +221,7 @@ handler 必须：
 - 幂等处理
 - 支持 retry
 - 容忍乱序事件
+- 使用 `merchantReferenceId` + `sessionId` 双重匹配本地订单；如果两个字段指向不同本地订单，必须拒绝、隔离或升级处理，不能只依赖其中一个字段
 
 核心事件通常包括：
 
@@ -238,7 +243,7 @@ clink webhook simulate order.succeeded --secret env:CLINK_WEBHOOK_SIGNING_KEY --
 clink smoke-test --webhook-url <webhook-url> --json
 ```
 
-然后创建真实 UAT checkout session。只有当有人打开 `checkoutUrl` 并完成 UAT 测试支付后，才能报告真实 UAT 支付 webhook 已完成。
+然后创建真实 UAT checkout session。只有当有人打开 `checkoutUrl` 并完成 UAT 测试支付，且你确认本地订单 paid/completed、额度/权益/发货/下载权限或其他 fulfillment 已完成后，才能报告真实 UAT 支付全链路完成。webhook 返回 200 只代表传输成功，不代表本地订单和业务交付已经完成。
 
 ## 最终交付
 

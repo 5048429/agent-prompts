@@ -48,6 +48,7 @@ clink webhook endpoint ensure \
   --url https://example.com/api/clink/webhook \
   --events core \
   --save-secret \
+  --sync-env-file .env.local \
   --json
 ```
 
@@ -58,11 +59,11 @@ After `--save-secret`, the agent must sync the returned or rotated signing secre
 - Secret Key setup for browserless, sandbox, cloud IDE, and low-code environments
 - local desktop Secret Key bootstrap with `clink login` and `clink dashboard apikey ensure-secret --save --json`
 - scanning the target project or website for paid products, prices, subscription plans, and billing intervals
-- generating a deterministic `clink-catalog.json`
+- generating a deterministic `clink-catalog.json` with product image sources (`imageId`, `imageUrl`, or `imageFile`)
 - validating, planning, and importing catalog data with `clink catalog validate`, `clink catalog plan`, and `clink catalog import`
 - server-side checkout and subscription route design
 - webhook endpoint automation with `clink webhook endpoint ensure`
-- raw-body webhook signature verification, idempotency, retry safety, and out-of-order handling
+- raw-body webhook signature verification, `merchantReferenceId` + `sessionId` order matching, idempotency, retry safety, and out-of-order handling
 - Elements embedded checkout guidance through `@clink-ai/clink-elements`
 - generic agent and OpenClaw merchant skill payment handoff design
 - review, validation, and developer-facing checklist generation

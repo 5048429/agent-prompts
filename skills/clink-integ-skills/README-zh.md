@@ -48,6 +48,7 @@ clink webhook endpoint ensure \
   --url https://example.com/api/clink/webhook \
   --events core \
   --save-secret \
+  --sync-env-file .env.local \
   --json
 ```
 
@@ -58,11 +59,11 @@ clink webhook endpoint ensure \
 - 面向浏览器不可用、沙箱、云 IDE、低代码环境的 Secret Key 设置
 - 本地桌面环境通过 `clink login` 和 `clink dashboard apikey ensure-secret --save --json` 自动 bootstrap Secret Key
 - 扫描目标项目或网站里的付费产品、价格、订阅计划和计费周期
-- 生成确定性的 `clink-catalog.json`
+- 生成确定性的 `clink-catalog.json`，每个 product 带 `imageId`、`imageUrl` 或 `imageFile`
 - 使用 `clink catalog validate`、`clink catalog plan`、`clink catalog import` 校验、预览并导入商品目录
 - 设计服务端 checkout 和 subscription 路由
 - 使用 `clink webhook endpoint ensure` 自动配置 webhook endpoint
-- 实现 raw body webhook 签名校验、幂等、重试安全和乱序容忍
+- 实现 raw body webhook 签名校验、`merchantReferenceId` + `sessionId` 双重匹配、幂等、重试安全和乱序容忍
 - 通过 `@clink-ai/clink-elements` 指导 Elements embedded checkout
 - 设计通用 agent 与 OpenClaw merchant skill 支付 handoff
 - 生成 review、校验报告和开发交接 checklist

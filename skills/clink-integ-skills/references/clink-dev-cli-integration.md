@@ -129,18 +129,32 @@ If no trustworthy server, serverless function, edge function, or backend exists:
 
 ## Product Catalog Import
 
-When the existing website, CMS, source code, pricing page, or database already contains paid products, one-time purchase items, subscription plans, prices, billing intervals, currencies, or plan features, the agent should scan those sources and generate a deterministic `clink-catalog.json`.
+When the existing website, CMS, source code, pricing page, or database already contains paid products, one-time purchase items, subscription plans, prices, billing intervals, currencies, plan features, or product images, the agent should scan those sources and generate a deterministic `clink-catalog.json`.
+
+Discovery order:
+
+1. Inspect running application data first: internal product/pricing APIs, server-rendered pricing DOM, hydrated JSON, visible pricing page state, and CMS preview/runtime endpoints.
+2. Inspect source and configuration next: route data, seed files, CMS adapters, billing config, constants, env examples, database seed/migration data, and product images under public/static assets.
+3. Ask the user only for missing business decisions or ambiguous product meaning after runtime and source discovery are exhausted.
 
 The CLI does not crawl the website. The agent discovers product data; the CLI validates, plans, imports, and maintains a source-to-Clink mapping.
 
 Use stable `sourceId` values from site slugs, route names, SKU values, CMS IDs, database IDs, or deterministic agent-generated slugs.
 
+Every discovered product must include exactly one image source in `clink-catalog.json`:
+
+- `imageId` for an existing Clink OSS image ID
+- `imageUrl` for a public HTTP(S) product image URL
+- `imageFile` for a local image path, resolved relative to `clink-catalog.json`; use `--project-root` and `--public-dir` when the source path is rooted in the project or public/static directory
+
+Do not put URL strings in `imageId`. Use `imageUrl` for URLs and `imageFile` for local assets. The CLI validates MIME, size, and existence; downloads `imageUrl`; reads `imageFile`; uploads missing assets to `/product/image/upload`; and caches `sha256 -> ossId` in the catalog mapping file.
+
 Recommended flow:
 
 ```bash
-clink catalog validate --file ./clink-catalog.json --json
-clink catalog plan --file ./clink-catalog.json --mapping-file ./.clink/catalog-map.json --json
-clink catalog import --file ./clink-catalog.json --mapping-file ./.clink/catalog-map.json --json
+clink catalog validate --file ./clink-catalog.json --project-root . --public-dir public --json
+clink catalog plan --file ./clink-catalog.json --mapping-file ./.clink/catalog-map.json --project-root . --public-dir public --json
+clink catalog import --file ./clink-catalog.json --mapping-file ./.clink/catalog-map.json --project-root . --public-dir public --json
 ```
 
 Use `clink product create` only for a single temporary test product or when the site does not already have a real catalog to import.
@@ -178,6 +192,7 @@ clink webhook endpoint ensure \
   --url <public-webhook-url> \
   --events core \
   --save-secret \
+  --sync-env-file .env.local \
   --json
 ```
 
@@ -209,7 +224,7 @@ For cloud-hosted platforms, low-code platforms, cloud IDEs, sandbox runtimes, an
 
 - If `CLINK_SECRET_KEY` is already configured as a backend/platform Secret, do not tell the user to run a local bootstrap script just to copy `CLINK_WEBHOOK_SIGNING_KEY`.
 - Do not present "run this script and paste the printed signing key into Secrets" as the normal completed integration state.
-- Install the CLI in the agent environment, verify `clink webhook endpoint ensure --help` includes `--show-secret`, deploy the webhook route to obtain the public HTTPS URL, then run `clink webhook endpoint ensure --url <public-webhook-url> --events core --save-secret --show-secret --json`.
+- Install the CLI in the agent environment, verify `clink webhook endpoint ensure --help` includes `--show-secret` and `--sync-env-file`, deploy the webhook route to obtain the public HTTPS URL, then run `clink webhook endpoint ensure --url <public-webhook-url> --events core --save-secret --show-secret --json`.
 - If the agent has platform Secret write access, write the returned or rotated signing secret into the backend Secret named `CLINK_WEBHOOK_SIGNING_KEY`, then restart or redeploy the service.
 - Only when the platform does not allow the agent to write Secrets, and no platform Secret API/tool is available, list a single remaining human step to add `CLINK_WEBHOOK_SIGNING_KEY` to the backend Secret manager. State that the blocker is platform Secret write permission, not a Clink CLI limitation.
 
@@ -250,6 +265,19 @@ After every successful `clink webhook endpoint ensure --save-secret`:
 2. restart or redeploy the server.
 3. Verify the webhook handler with `clink webhook simulate`, `clink webhook sign`, or `clink webhook verify`.
 
+For local `.env` based apps, prefer:
+
+```bash
+clink webhook endpoint ensure \
+  --url <public-webhook-url> \
+  --events core \
+  --save-secret \
+  --sync-env-file .env.local \
+  --json
+```
+
+Add `--restart-command "<local restart command>"` only when the restart is safe and explicit for the current project.
+
 When an existing endpoint cannot return the plaintext signing secret, `ensure --save-secret` may rotate the secret to obtain a usable value. Treat that as immediate invalidation of the previous signing key and update the merchant runtime before expecting webhook verification to pass.
 
 Every webhook URL change requires rerunning `clink webhook endpoint ensure --save-secret --json`, syncing the new signing secret, and restarting or redeploying.
@@ -267,6 +295,8 @@ The webhook route must:
 - process events idempotently
 - handle retries safely
 - tolerate out-of-order events
+- reconcile local orders using both `merchantReferenceId` and `sessionId` when both are available; never rely on only one field when the local checkout record contains both
+- reject or quarantine events whose `merchantReferenceId` and `sessionId` point to different local orders
 
 Treat webhooks as authoritative for payment and subscription state. Do not treat `successUrl`, iframe callbacks, or frontend SDK events as final payment confirmation.
 
@@ -300,6 +330,7 @@ clink smoke-test --webhook-url <public-webhook-url>/api/clink/webhook --json
 6. Real UAT payment only after someone opens the returned `checkoutUrl` and completes payment.
 
 Never claim a real payment webhook was completed unless a real UAT payment was completed.
+Webhook 200 is not sufficient for real-payment completion. The final real-payment checklist must confirm the local order matched by both `merchantReferenceId` and `sessionId` is paid/completed, and the merchant entitlement, credits, shipment, download access, or other fulfillment is complete.
 
 ## Delivery Checklist
 
