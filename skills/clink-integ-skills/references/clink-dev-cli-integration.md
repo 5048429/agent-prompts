@@ -203,6 +203,18 @@ clink webhook endpoint ensure \
 
 The CLI compatibility alias `clink dashboard webhook ensure` may exist for older scripts, but new guidance should use `clink webhook endpoint ensure`.
 
+### Lovable And Low-Code Secret Sync
+
+For Lovable Cloud, low-code platforms, cloud IDEs, and similar hosted environments:
+
+- If `CLINK_SECRET_KEY` is already configured as a backend/platform Secret, do not tell the user to run a local bootstrap script just to copy `CLINK_WEBHOOK_SIGNING_KEY`.
+- Do not present "run this script and paste the printed signing key into Secrets" as the normal completed integration state.
+- Install the CLI in the agent environment, verify `clink webhook endpoint ensure --help` includes `--show-secret`, deploy the webhook route to obtain the public HTTPS URL, then run `clink webhook endpoint ensure --url <public-webhook-url> --events core --save-secret --show-secret --json`.
+- If the agent has platform Secret write access, write the returned or rotated signing secret into the backend Secret named `CLINK_WEBHOOK_SIGNING_KEY`, then restart or redeploy the service.
+- Only when the platform does not allow the agent to write Secrets, and no platform Secret API/tool is available, list a single remaining human step to add `CLINK_WEBHOOK_SIGNING_KEY` to the backend Secret manager. State that the blocker is platform Secret write permission, not a Clink CLI limitation.
+
+`CLINK_CATALOG_MAP` is not a secret. Prefer storing the catalog mapping in the repository-controlled mapping file, such as `.clink/catalog-map.json`, or another backend-readable configuration. Do not ask the user to manually paste catalog map data unless the platform has no writable file or configuration path and the reason is documented.
+
 ## URL Strategy
 
 Use an existing public HTTPS domain whenever one is available:
