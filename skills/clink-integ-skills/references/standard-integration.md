@@ -43,14 +43,6 @@ Do not invent `productId` or `priceId`.
 
 In a typical registered-product implementation, the merchant frontend selects from products and prices that the merchant backend or frontend fetched from Clink first. If the merchant's site already has a pricing page, CMS plan list, or subscription catalog, the agent should generate `clink-catalog.json` and use `clink catalog validate`, `clink catalog plan`, and `clink catalog import` before asking the user to manually copy product or price IDs.
 
-Product discovery order:
-
-1. Inspect running application APIs, rendered pricing DOM, hydrated JSON, and visible pricing page state.
-2. Inspect source/configuration, CMS adapters, route data, seed data, constants, and public/static product assets.
-3. Ask the user only for unresolved business decisions or ambiguous products.
-
-The `clink-catalog.json` artifact must include exactly one image source for every product: `imageId`, `imageUrl`, or `imageFile`. Use `imageUrl` for URLs and `imageFile` for local public/static assets; do not put URLs in `imageId`.
-
 #### Non-Registered Product Mode
 
 Use this mode when the merchant does not rely on pre-created Clink products for the order.
@@ -139,7 +131,6 @@ clink webhook endpoint ensure \
   --url <public-webhook-url> \
   --events core \
   --save-secret \
-  --sync-env-file .env.local \
   --json
 ```
 
@@ -195,8 +186,6 @@ The merchant backend should:
 - implement idempotency
 - handle retries safely
 - tolerate out-of-order delivery
-- reconcile payment events against the local checkout/order using both `merchantReferenceId` and `sessionId` when both are present
-- reject, quarantine, or escalate events where `merchantReferenceId` and `sessionId` resolve to different local orders
 
 Primary event groups for this path:
 
@@ -206,6 +195,8 @@ Primary event groups for this path:
 - `refund.succeeded`
 - `subscription.created`
 - `invoice.paid`
+
+These concrete event names come from the current `clink-dev-cli` Secret Key webhook endpoint event catalog and generated OpenAPI types. If official docs expose only resource groups such as `session`, `order`, `refund`, `subscription`, or `invoice`, prefer the CLI/OpenAPI event catalog for endpoint automation and simulation.
 
 Prefer backend webhook-driven state synchronization over relying only on frontend redirects.
 
@@ -237,8 +228,6 @@ A robust merchant flow may also:
 - use iframe callback or redirect return only as a UX handoff, not as authoritative payment confirmation
 
 Do not describe `successUrl` alone as the authoritative payment confirmation signal.
-
-Webhook HTTP 200 is not enough to call a real payment complete. A real-payment validation must also confirm the local order matched by both `merchantReferenceId` and `sessionId` is paid/completed and the merchant entitlement, credits, shipment, download access, or other fulfillment has completed.
 
 ### Step 7: Trigger Merchant Fulfillment After Payment
 

@@ -26,8 +26,7 @@ For standard integration webhook validation:
 4. confirm the service is restarted or redeployed after signing-secret sync
 5. confirm header verification for `X-Clink-Timestamp` and `X-Clink-Signature`
 6. confirm idempotency, retry safety, and out-of-order tolerance
-7. confirm order reconciliation matches both `merchantReferenceId` and `sessionId` when both are available, and quarantines mismatches
-8. emit remediation items for missing controls
+7. emit remediation items for missing controls
 
 Prefer:
 

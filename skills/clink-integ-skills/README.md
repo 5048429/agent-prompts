@@ -2,144 +2,303 @@
 
 English | [简体中文](README-zh.md)
 
-`clink-integ-skills` is a Codex-compatible skill for helping coding agents integrate ClinkBill payments. The current version is CLI-first: it guides agents to use `clink-dev-cli`, Secret Key authentication, product catalog import, checkout or subscription APIs, webhook endpoint automation, webhook signature verification, and UAT validation.
+`clink-integ-skills` is a modular skill for guiding a coding agent through Clink integrations, validating integration decisions, reviewing existing designs, and answering documentation-backed integration questions.
 
-Use the parent `agent-prompts` repository as the distribution package. This folder is the installable skill, and the parent repository also contains short prompts to give to agents. The agent-facing default prompt is in `agents/openai.yaml`, and longer Chinese prompt references are in `references/agent-prompt.zh-CN.md` and `references/universal-agent-prompt.zh-CN.md`.
+It is built around five primary guidance paths:
 
-## Current Integration Model
+- standard integration
+- clink-dev-cli first integration
+- new user onboarding
+- merchant skill for generic agent integration
+- merchant skill for OpenClaw integration
 
-Normal integration no longer needs a Dashboard Console token after the Secret Key is configured.
+It also supports Clink documentation-backed guidance, integration validation, and guidance artifact generation.
 
-In a local desktop environment, when no Secret Key has been provided and a browser is available, the agent may run:
+Instead of copying Clink product docs into the skill repository, this skill keeps workflow, routing, validation, and output conventions in the repo and uses the official Clink docs export at `https://docs.clinkbill.com/llms-full.txt` as the maintainer source during skill development. Its job is to help a coding agent decide how to integrate correctly, not to guess final project-specific code without enough stack context.
 
-```bash
-npm install --prefix ./.clink-tools github:5048429/clink-dev-cli
-./.clink-tools/node_modules/.bin/clink --version
-./.clink-tools/node_modules/.bin/clink --help
-```
+---
 
-If you intentionally use global npm, include `--install-links=true`:
+## What It Helps With
 
-```bash
-npm install -g --install-links=true github:5048429/clink-dev-cli
-clink login
-clink dashboard whoami --json
-clink dashboard apikey ensure-secret --save --json
-clink auth status --json
-```
+You can use this skill to:
 
-The human only completes Dashboard login in the opened browser. The CLI then finds or initializes the sandbox Secret Key and saves it to the CLI profile. If the merchant app runtime needs `CLINK_SECRET_KEY`, the agent can use `--show-secret` only in a controlled local secret-write step and write the value to an ignored `.env`, platform Secret, or secret manager.
+- design standard integration flows, including registered-product product and price selection, checkout session creation, subscription-aware purchase-path routing, webhook contract review, and optional embedded form integration through JS SDK or `@clink-ai/clink-elements`
+- guide CLI-first integrations with `clink-dev-cli`, including local `clink login` Secret Key bootstrap, browserless Secret Key setup, catalog import, webhook endpoint automation, signing-secret sync, and smoke-test/UAT validation
+- guide new users through docs-backed first-time setup, including account access, MFA, merchant selection, Secret Key setup, product choice, webhook registration, and first checkout preparation
+- design merchant skill for generic agent integration using `agentic-payment-skills` / `clink-payment-skill`, including `clink-cli` dependency setup, adapter contracts, payment execution, callback, and task resume behavior
+- design merchant skill for OpenClaw integration using `openclaw-payment-skills`, including merchant skill integration and merchant backend webhook support for email verification via `customer.verify`
+- answer questions based on official Clink docs and extract relevant endpoint, field, webhook, and contract details
+- review payment handoff contracts in merchant skill integrations
+- generate developer-facing checklists, validation reports, payload skeletons, and guidance artifacts that help a coding agent implement the integration in the user’s actual stack
 
-In cloud, low-code, sandbox, or browserless environments, the user provides `CLINK_SECRET_KEY` once, then the agent configures the CLI:
+For standard integration, the expected scope includes:
 
-```bash
-npm install --prefix ./.clink-tools github:5048429/clink-dev-cli
-export CLINK_SECRET_KEY=sk_test_xxx
-clink auth secret set --api-key env:CLINK_SECRET_KEY --env sandbox
-clink auth status --json
-```
+- registered-product product and price sourcing from Clink when that mode is used
+- product catalog import with `clink catalog validate`, `clink catalog plan`, and `clink catalog import` when the merchant already has paid products, pricing pages, CMS entries, or subscription plans
+- subscription-aware purchase-path branching such as checkout vs customer portal
+- merchant backend checkout session creation
+- webhook endpoint automation with `clink webhook endpoint ensure`, signing-secret sync, and merchant webhook handling
+- subscription lifecycle webhook coverage and post-return status reconciliation when needed
+- optional merchant frontend integration through JS SDK embedded form or configured link opening
+- Elements embedded checkout integration through `@clink-ai/clink-elements`, including React, Vue, and native JS guidance; SDK lifecycle and iframe mount/unmount behavior; headless hook or composable patterns plus inline, modal, drawer, and multi-step layout recipes; event-to-host-UI mapping; promotion-code UI integration; locale/theme customization; SDK-managed vs host-managed skeleton strategies; and webhook and reconciliation boundaries for embedded checkout
 
-After either path, product catalog import, checkout/subscription calls, webhook endpoint management, doctor, smoke-test, and local webhook commands should run with Secret Key authentication.
+For new user onboarding, the expected scope includes:
 
-Webhook endpoint management should be done through the Secret Key API path:
+- account invitation, password setup, and MFA guidance from the quickstart docs
+- merchant selection and merchant profile checks under `Settings > Merchant`
+- user and role setup under `Settings > Users`
+- Secret Key retrieval from `Merchant Dashboard > Developers > API Keys` through `Initialize Key`
+- local desktop Secret Key bootstrap through `clink login` and `clink dashboard apikey ensure-secret --save --json`
+- product mode decision before first checkout
+- webhook endpoint automation through `clink webhook endpoint ensure`, with Dashboard setup as a fallback when CLI automation is unavailable
+- first sandbox checkout session preparation and next-path routing
 
-```bash
-clink webhook endpoint ensure \
-  --url https://example.com/api/clink/webhook \
-  --events core \
-  --save-secret \
-  --sync-env-file .env.local \
-  --json
-```
+For documentation-backed guidance, the expected scope includes:
 
-After `--save-secret`, the agent must sync the returned or rotated signing secret into the merchant runtime as `CLINK_WEBHOOK_SIGNING_KEY`, then restart or redeploy the app. A webhook URL change requires running `ensure` again and repeating the sync.
+- explaining doc content in plain language
+- answering endpoint, field, webhook, or behavior questions from official docs
+- checking whether an integration idea matches the documented contract
 
-## What The Skill Covers
+For merchant skill for generic agent integration, the expected scope includes:
 
-- Secret Key setup for browserless, sandbox, cloud IDE, and low-code environments
-- local desktop Secret Key bootstrap with `clink login` and `clink dashboard apikey ensure-secret --save --json`
-- scanning the target project or website for paid products, prices, subscription plans, and billing intervals
-- generating a deterministic `clink-catalog.json` with product image sources (`imageId`, `imageUrl`, or `imageFile`)
-- validating, planning, and importing catalog data with `clink catalog validate`, `clink catalog plan`, and `clink catalog import`
-- server-side checkout and subscription route design
-- webhook endpoint automation with `clink webhook endpoint ensure`
-- raw-body webhook signature verification, `merchantReferenceId` + `sessionId` order matching, idempotency, retry safety, and out-of-order handling
-- Elements embedded checkout guidance through `@clink-ai/clink-elements`
-- generic agent and OpenClaw merchant skill payment handoff design
-- review, validation, and developer-facing checklist generation
+- identifying the target agent runtime and whether an adapter is needed
+- loading the latest available `agentic-payment-skills` context before generating or reviewing code
+- defining merchant skill or merchant tool responsibilities in the generic agent runtime
+- defining how the generic agent invokes `agentic-payment-skills` / `clink-payment-skill`
+- supporting merchant `402 Payment Required` handoff into `agentic-payment-skills` when the merchant returns a structured payment requirement
+- defining payment invocation, merchant confirmation, callback, and resume contract
+- separating generic agent runtime, adapter, merchant server, and `agentic-payment-skills` ownership
+- defining idempotency and duplicate-delivery behavior for handoff, callback, webhook, and confirmation paths
+- preserving the `clink-payment-skill` boundary: it executes wallet/card/pay/refund/risk-rule operations, but does not decide pricing, entitlement, or merchant receipt confirmation
 
-The agent discovers product data from the merchant project. The CLI validates, plans, imports, and manages Clink-side resources.
+For merchant skill for OpenClaw integration, the expected scope includes:
 
-## Agent Prompt
+- loading the latest available `openclaw-payment-skills` context before generating or reviewing code
+- defining merchant skill responsibilities inside the OpenClaw runtime
+- defining how the merchant skill invokes `openclaw-payment-skills`
+- defining session mode or direct mode payment setup
+- defining merchant integration metadata such as `server`, `confirm_tool`, and `confirm_args`
+- separating merchant skill, merchant server, and `openclaw-payment-skills` ownership
+- defining merchant confirmation, recovery, and task resume behavior
+- including `customer.verify` webhook handling when email verification is in scope
 
-Use this concise prompt when handing a project to an agent:
+For developer validation requests, the expected scope includes:
 
-```text
-Use $clink-integ-skills to integrate ClinkBill payments into this project with clink-dev-cli, Secret Key setup, product catalog import, checkout/subscription APIs, webhook endpoint automation, and UAT validation.
-```
+- contract validation and remediation items
+- webhook readiness checks
+- guidance artifact generation for implementation handoff
+- docs-backed confirmation of supported vs unsupported API claims
 
-The skill itself tells the agent which references to read for standard integration, onboarding, validation, Elements, generic agent payment skills, and OpenClaw payment skills.
+This skill should usually tell the coding agent:
 
-## Install
+- which integration path applies
+- which assumptions must be confirmed first
+- which contracts and fields matter
+- which unsupported claims must be avoided
 
-Install from GitHub into a Codex-compatible local skills directory:
+This skill should not usually try to output final project-specific integration code unless the user’s real stack and codebase are clearly known.
 
-```bash
-mkdir -p ~/.codex/skills
-git clone https://github.com/5048429/agent-prompts.git /tmp/agent-prompts
-cp -R /tmp/agent-prompts/skills/clink-integ-skills ~/.codex/skills/clink-integ-skills
-```
+Examples:
 
-Or ask the agent:
+- `Design a standard integration for checkout, webhook, and refund`
+- `Create a new user onboarding plan for a merchant starting from zero with Clink quickstart`
+- `Design a registered-product integration with product/price selection, checkout, webhook, and customer portal fallback`
+- `Design a merchant skill for generic agent integration using agentic-payment-skills for my custom agent runtime with clink-cli payment execution, callback, and task resume`
+- `Design a merchant skill for OpenClaw integration using openclaw-payment-skills with merchant skill handoff and customer.verify email verification support`
+- `Explain what this Clink API field means based on the official docs`
+- `Review this payment handoff contract`
 
-```text
-Install clink-integ-skills from: https://github.com/5048429/agent-prompts/tree/main/skills/clink-integ-skills
-```
+---
 
-No runtime dependency install is required for the skill itself.
-
-## Key Files
+## Module Layout
 
 | File | Purpose |
 |---|---|
-| `SKILL.md` | Main routing rules and hard constraints |
-| `agents/openai.yaml` | Agent UI metadata and default prompt |
+| `SKILL.md` | Main routing and operating rules |
+| `references/retrieval-protocol.md` | Local-doc retrieval protocol |
 | `references/clink-dev-cli-integration.md` | CLI-first Secret Key, catalog, checkout, webhook, and UAT workflow |
-| `references/standard-integration.md` | Standard Clink integration workflow |
-| `references/new-user-onboarding.md` | New user onboarding and first sandbox checkout workflow |
-| `references/agent-prompt.zh-CN.md` | Chinese agent prompt reference |
-| `references/universal-agent-prompt.zh-CN.md` | Universal Chinese agent prompt reference |
-| `references/review-checklist.md` | Review gates |
-| `references/output-artifacts.md` | Expected implementation handoff artifacts |
-| `lib/skill-runtime.mjs` | Runtime route and artifact generation logic |
-| `lib/validators.mjs` | Contract and webhook design validators |
+| `references/new-user-onboarding.md` | Docs-backed new user onboarding workflow |
+| `references/standard-integration.md` | Standard integration workflow |
+| `references/elements-integration.md` | Elements embedded checkout frontend workflow |
+| `references/generic-agent-integration.md` | Merchant skill for generic agent integration workflow |
+| `references/agent-integration.md` | Merchant skill for OpenClaw integration workflow |
+| `references/output-artifacts.md` | Developer-facing artifact expectations |
+| `references/validation-workflow.md` | Validation workflow |
+| `references/review-checklist.md` | Review checklist and quality gates |
+| `references/agent-prompt.zh-CN.md` | Chinese agent prompt for automated ClinkBill UAT integration |
+| `references/universal-agent-prompt.zh-CN.md` | Short Chinese reusable prompt for CLI-first integration |
+| `scripts/load_payment_skill_contexts.mjs` | Payment skill context refresh and cache loader |
+| `agents/openai.yaml` | UI metadata for skill lists and default prompts |
+
+---
+
+## Maintainer Reference
+
+During development and maintenance of this skill, the official docs source is:
+
+- `https://docs.clinkbill.com/llms-full.txt`
+
+The downloaded cache is stored at a fixed path under this skill:
+
+- `clink-integ-skills/.cache/official-docs/llms-full.txt`
+
+This cache is for skill authors and maintainers. It is not a runtime requirement for merchants using the skill.
+
+Refresh behavior:
+
+- prefer `node scripts/load_official_docs.mjs` for doc-dependent workflows so freshness is enforced centrally
+- run `node scripts/refresh_official_docs.mjs` directly only when you want an explicit refresh or cache status action
+- if the cached docs are older than 7 days, the script refreshes them automatically
+- if you want to refresh immediately, run `node scripts/refresh_official_docs.mjs --force`
+- if you only want the current cache status, run `node scripts/refresh_official_docs.mjs --status`
+
+Common references live inside the cached `llms-full.txt`, including:
+
+- quickstart content
+- integration content
+- API reference content
+- webhook-related content
+
+For merchant skill paths, the skill also refreshes payment skill context before code generation or review:
+
+```bash
+node scripts/load_payment_skill_contexts.mjs --dependency agentic-payment-skills --print-path
+node scripts/load_payment_skill_contexts.mjs --dependency openclaw-payment-skills --print-path
+```
+
+For generic agent integration review, load and read `agentic-payment-skills`. For OpenClaw agent review, load and read `openclaw-payment-skills`. The script downloads the requested GitHub codeload zip context into `.cache/payment-skill-contexts/`, writes source metadata, and avoids mutating sibling payment skill worktrees. If zip download fails, it falls back to local sibling skill files and marks the context as not confirmed latest.
+
+---
+
+## Install
+
+### Install From Your Agent Chat
+
+Open Claude, Codex, or Gemini CLI, then ask the agent to install the skill from GitHub:
+
+```text
+Install clink-integ-skills: https://github.com/clinkbillcom/clink-integ-skills
+```
+
+### Install With Git Clone
+
+For Codex-compatible local skills, clone the repository into `~/.codex/skills/`:
+
+```bash
+mkdir -p ~/.codex/skills
+git clone https://github.com/clinkbillcom/clink-integ-skills.git ~/.codex/skills/clink-integ-skills
+```
+
+### Manual Local Install Fallback
+
+If the agent cannot install from chat and the environment cannot run `git clone`, download the repository source and place the extracted `clink-integ-skills` directory under the agent's local skills directory. For Codex, the default local directory is `~/.codex/skills/`.
+
+No runtime dependency install is required by default.
+
+---
 
 ## Tooling
 
-Run the checks and helpers from the repository root:
-
-```bash
-npm test
-npm run test:structure
-npm run test:runtime
-npm run test:contracts
-node scripts/run_skill_runtime.mjs --prompt "Integrate Clink checkout and webhooks" --json
-node scripts/generate_guidance_artifacts.mjs --prompt "Design a Clink webhook integration"
-```
-
-For doc-dependent maintenance, use the built-in docs gate:
+Use the bundled scripts when you want more than prose:
 
 ```bash
 node scripts/load_official_docs.mjs --json
+node scripts/load_payment_skill_contexts.mjs --json
+node scripts/lint_contract.mjs path/to/contract.json
+node scripts/lint_webhook_design.mjs path/to/design.md
+node scripts/generate_guidance_artifacts.mjs --prompt "Design a Clink webhook integration"
+node scripts/run_skill_runtime.mjs --prompt "Review this payment handoff contract" --json
 ```
 
-It uses the official Clink docs export at `https://docs.clinkbill.com/llms-full.txt`, refreshes stale cache automatically, and avoids guessing API behavior from memory.
+These scripts turn the skill into a developer integration workbench:
+
+- docs gate enforcement
+- payment skill context refresh for agentic-payment-skills and openclaw-payment-skills
+- contract validation
+- webhook design validation
+- guidance artifact generation
+- runtime trace for route and docs usage
+
+Typical flow:
+
+1. load docs through the gate when facts must be confirmed
+2. generate guidance artifacts for the target integration path
+3. validate the contract or webhook design before implementation or launch
+
+Safety note:
+
+- fixture docs are no longer used by default in developer-facing scripts
+- use `--allow-fixture-fallback` only for tests or controlled local simulation
+
+---
+
+## Test
+
+Run the automated checks from the repository root:
+
+```bash
+npm test
+```
+
+The test harness validates:
+
+- structure tests
+- snapshot tests
+- docs gate tests
+- runtime tests
+- validator tests
+
+Run the layers individually:
+
+```bash
+npm run test:structure
+npm run test:behavior
+npm run test:decision
+npm run test:docs-gate
+npm run test:runtime
+npm run test:contracts
+```
+
+Notes:
+
+- `test:behavior` and `test:decision` are snapshot-style regression checks
+- `test:docs-gate`, `test:runtime`, and `test:contracts` validate executable behavior
+
+Run LLM-backed tests with a real model:
+
+```bash
+GEMINI_API_KEY=your_key \
+npm run test:llm
+```
+
+Optional:
+
+```bash
+GEMINI_API_KEY=your_key \
+node tests/run_llm_skill_tests.mjs --case webhook-setup
+```
+
+If a longer case gets truncated, increase the output budget:
+
+```bash
+GEMINI_API_KEY=your_key \
+node tests/run_llm_skill_tests.mjs --max-output-tokens 3000
+```
+
+Defaults:
+
+- model: `gemini-3-flash-preview`
+- base URL: `https://generativelanguage.googleapis.com/v1beta/openai`
+- docs root: `tests/fixtures/public-docs` unless `CLINK_DOCS_ROOT` is set
+
+---
 
 ## Compatibility
 
+- OpenClaw
 - Codex-style modular skills
-- OpenClaw merchant skill flows
-- Generic agent payment skill flows
+
+---
 
 ## License
 

@@ -17,7 +17,7 @@ A strong standard integration output should usually include:
 For registered product mode, add:
 
 - product and price sourcing checklist
-- `clink-catalog.json` import plan when products are discovered from the existing site, CMS, pricing page, or source code; each product must include `imageId`, `imageUrl`, or `imageFile`
+- `clink-catalog.json` import plan when products are discovered from the existing site, CMS, pricing page, or source code
 
 For non-registered product mode, add:
 
@@ -45,7 +45,7 @@ A strong new user onboarding output should usually include:
 - dashboard setup checklist covering merchant profile, users, products, and API key access
 - secret setup checklist covering local `clink login` bootstrap, browserless manual Secret Key setup, CLI profile setup, webhook endpoint ensure, signing-secret sync, and safe storage placeholders
 - product mode decision checklist for registered product mode vs non-registered product mode
-- first checkout smoke-test checklist for sandbox checkout session creation, signed simulated webhook verification, real sandbox payment, local order paid/completed verification, and entitlement/fulfillment completion
+- first checkout smoke-test checklist for sandbox checkout session creation and post-checkout verification
 - next-path recommendation that routes the user to standard integration, generic agent integration, OpenClaw integration, or validation
 
 ## Merchant Skill for OpenClaw Integration Artifacts
