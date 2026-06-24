@@ -203,9 +203,9 @@ clink webhook endpoint ensure \
 
 The CLI compatibility alias `clink dashboard webhook ensure` may exist for older scripts, but new guidance should use `clink webhook endpoint ensure`.
 
-### Lovable And Low-Code Secret Sync
+### Hosted And Low-Code Secret Sync
 
-For Lovable Cloud, low-code platforms, cloud IDEs, and similar hosted environments:
+For cloud-hosted platforms, low-code platforms, cloud IDEs, sandbox runtimes, and similar browserless hosted environments:
 
 - If `CLINK_SECRET_KEY` is already configured as a backend/platform Secret, do not tell the user to run a local bootstrap script just to copy `CLINK_WEBHOOK_SIGNING_KEY`.
 - Do not present "run this script and paste the printed signing key into Secrets" as the normal completed integration state.
