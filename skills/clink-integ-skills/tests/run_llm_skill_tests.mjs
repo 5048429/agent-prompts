@@ -243,7 +243,7 @@ async function buildInstructions(testCase) {
     .map((label) => `- ${label}`)
     .join("\n");
 
-  return `You are simulating the behavior of the local skill repository "clink-dev-skill".
+  return `You are simulating the behavior of the local skill repository "clink-integ-skill".
 
 Follow the skill materials below exactly as the governing instructions for this task.
 

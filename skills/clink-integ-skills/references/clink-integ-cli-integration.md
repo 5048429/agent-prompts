@@ -6,7 +6,7 @@ This module is the CLI-first workflow for coding agents that integrate ClinkBill
 
 Use it when the task mentions:
 
-- `clink-dev-cli`
+- `clink-integ-cli`
 - Secret Key setup
 - local desktop `clink login` bootstrap
 - webhook endpoint automation
@@ -18,14 +18,14 @@ Use it when the task mentions:
 
 The current operational sources are:
 
-- `https://github.com/5048429/clink-dev-cli`
+- `https://github.com/5048429/clink-integ-cli`
 - `https://github.com/5048429/agent-prompts`
 - official API docs from `https://docs.clinkbill.com/`
 
 Install the CLI from GitHub, not from npm registry, unless the user has confirmed another release channel. For agents, sandboxes, CI, and low-code runtimes, prefer a project-local tools directory:
 
 ```bash
-npm install --prefix ./.clink-tools github:5048429/clink-dev-cli
+npm install --prefix ./.clink-tools github:5048429/clink-integ-cli
 ./.clink-tools/node_modules/.bin/clink --version
 ./.clink-tools/node_modules/.bin/clink env list --help
 ./.clink-tools/node_modules/.bin/clink env add --help
@@ -44,7 +44,7 @@ Windows PowerShell local binary:
 Global install is optional for developer machines where global npm is known to work. Use `--install-links=true` to avoid broken global junctions that some npm/Windows combinations create for GitHub dependencies:
 
 ```bash
-npm install -g --install-links=true github:5048429/clink-dev-cli
+npm install -g --install-links=true github:5048429/clink-integ-cli
 clink --version
 clink env list --help
 clink env add --help
@@ -58,7 +58,7 @@ GitHub installs should use the committed `dist/` output from the CLI repo. Do no
 
 ## CLI Environment And Request Domain
 
-`clink-dev-cli` supports request-domain environment switching. Keep the skill's user-facing readiness model as `sandbox` and `production`, but use the CLI environment registry to ensure every CLI request goes to the intended API base URL.
+`clink-integ-cli` supports request-domain environment switching. Keep the skill's user-facing readiness model as `sandbox` and `production`, but use the CLI environment registry to ensure every CLI request goes to the intended API base URL.
 
 Built-in CLI environments:
 
@@ -236,7 +236,7 @@ If the product is subscription-based, design whether the user should create a ne
 
 ## Webhook Endpoint Automation
 
-Webhook endpoint management is Secret Key API-compatible through `clink-dev-cli`.
+Webhook endpoint management is Secret Key API-compatible through `clink-integ-cli`.
 
 Primary command:
 

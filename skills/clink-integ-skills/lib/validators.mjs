@@ -121,7 +121,7 @@ export function lintWebhookDesign(input) {
   }
 
   if (!text.includes("clink webhook endpoint ensure")) {
-    warnings.push("Prefer `clink webhook endpoint ensure --events core --save-secret --json` for webhook endpoint management when clink-dev-cli is available");
+    warnings.push("Prefer `clink webhook endpoint ensure --events core --save-secret --json` for webhook endpoint management when clink-integ-cli is available");
   }
 
   return {

@@ -22,7 +22,7 @@ const requiredFiles = [
   "lib/validators.mjs",
   "lib/skill-runtime.mjs",
   "references/retrieval-protocol.md",
-  "references/clink-dev-cli-integration.md",
+  "references/clink-integ-cli-integration.md",
   "references/agent-prompt.zh-CN.md",
   "references/universal-agent-prompt.zh-CN.md",
   "references/new-user-onboarding.md",
@@ -56,7 +56,7 @@ const moduleExpectations = [
     file: "SKILL.md",
     contains: [
       "standard integration",
-      "clink-dev-cli",
+      "clink-integ-cli",
       "local clink login Secret Key bootstrap",
       "CLI request-domain environment switching",
       "clink env list",
@@ -79,7 +79,7 @@ const moduleExpectations = [
       "node scripts/load_official_docs.mjs",
       "node scripts/load_payment_skill_contexts.mjs",
       "references/new-user-onboarding.md",
-      "references/clink-dev-cli-integration.md",
+      "references/clink-integ-cli-integration.md",
       "references/elements-integration.md",
       "@clink-ai/clink-elements",
       "loadClinkElements",
@@ -101,13 +101,13 @@ const moduleExpectations = [
       "short_description",
       "default_prompt",
       "$clink-integ-skills",
-      "clink-dev-cli"
+      "clink-integ-cli"
     ]
   },
   {
-    file: "references/clink-dev-cli-integration.md",
+    file: "references/clink-integ-cli-integration.md",
     contains: [
-      "github:5048429/clink-dev-cli",
+      "github:5048429/clink-integ-cli",
       "Path A: Local Desktop Bootstrap",
       "Path B: Cloud, Low-Code, Sandbox, Or Browserless",
       "clink login",

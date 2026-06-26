@@ -124,7 +124,7 @@ Non-registered product mode:
 
 ### Step 5: Webhook Endpoint Setup
 
-For webhook setup, prefer the Secret Key API through `clink-dev-cli`.
+For webhook setup, prefer the Secret Key API through `clink-integ-cli`.
 
 The Dashboard location for viewing or manually checking webhook endpoint records is `Merchant Dashboard > Developers > Webhooks`, but onboarding guidance should not default to Dashboard-only webhook setup when the CLI can register the endpoint and save the signing secret.
 

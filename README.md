@@ -23,7 +23,7 @@ https://github.com/5048429/agent-prompts/tree/main/skills/clink-integ-skills
 
 安装/读取完成后，立即使用 $clink-integ-skills 帮我把 ClinkBill 支付接入到当前项目。
 
-目标：尽量全自动完成 sandbox/UAT 支付接入。优先使用 clink-dev-cli。除了 Secret Key 获取或本地 Dashboard 登录这一步，不要让我手动创建 product、price、webhook endpoint，也不要让我手动复制 webhook signing key。
+目标：尽量全自动完成 sandbox/UAT 支付接入。优先使用 clink-integ-cli。除了 Secret Key 获取或本地 Dashboard 登录这一步，不要让我手动创建 product、price、webhook endpoint，也不要让我手动复制 webhook signing key。
 
 本地桌面环境：如果没有现成 Secret Key，可以运行 clink login，让我在浏览器里手动登录；登录后你继续运行 clink dashboard apikey ensure-secret --save --json，并用 Secret Key API 完成后续接入。
 

@@ -1,6 +1,6 @@
 ---
 name: clink-integ-skills
-description: Design, scaffold, validate, and review ClinkBill/Clink payment integrations, including clink-dev-cli usage, local clink login Secret Key bootstrap, browserless manual Secret Key setup, webhook endpoint automation, product/price/subscription catalog import, checkout and subscription APIs, webhook signature verification, UAT validation, new user onboarding, merchant skill integrations, and documentation-backed contracts.
+description: Design, scaffold, validate, and review ClinkBill/Clink payment integrations, including clink-integ-cli usage, local clink login Secret Key bootstrap, browserless manual Secret Key setup, webhook endpoint automation, product/price/subscription catalog import, checkout and subscription APIs, webhook signature verification, UAT validation, new user onboarding, merchant skill integrations, and documentation-backed contracts.
 ---
 
 # clink-integ-skills
@@ -19,7 +19,7 @@ This skill is modular:
 This skill covers four primary guidance paths:
 
 - standard integration, including checkout session creation, webhook contract review, and optional embedded form integration through JS SDK and `@clink-ai/clink-elements`
-- clink-dev-cli first integration, including local `clink login` Secret Key bootstrap, browserless manual Secret Key setup, CLI request-domain environment switching, catalog import, webhook endpoint automation, signing-secret sync, smoke tests, and sandbox flows
+- clink-integ-cli first integration, including local `clink login` Secret Key bootstrap, browserless manual Secret Key setup, CLI request-domain environment switching, catalog import, webhook endpoint automation, signing-secret sync, smoke tests, and sandbox flows
 - new user onboarding, including docs-backed first-time dashboard, account, API key, product, webhook, and first checkout setup guidance
 - merchant skill for generic agent integration, including non-OpenClaw agent runtime contracts through `agentic-payment-skills`, adapter design, `clink-cli` payment execution, callback, and task resume behavior
 - merchant skill for OpenClaw integration, including OpenClaw merchant skill integration through `openclaw-payment-skills` and merchant backend webhook support for email verification
@@ -46,7 +46,7 @@ Use this path when the user wants help with:
 Read:
 
 - `references/retrieval-protocol.md`
-- `references/clink-dev-cli-integration.md`
+- `references/clink-integ-cli-integration.md`
 - run `node scripts/load_official_docs.mjs`
 - `references/new-user-onboarding.md`
 
@@ -62,7 +62,7 @@ Use this path when the user wants help with:
 - hosted checkout
 - checkout session creation
 - merchant backend implementation
-- `clink-dev-cli`
+- `clink-integ-cli`
 - Secret Key setup
 - product, price, catalog, or subscription import
 - webhook endpoint automation and verification
@@ -76,7 +76,7 @@ Use this path when the user wants help with:
 Read:
 
 - `references/retrieval-protocol.md`
-- `references/clink-dev-cli-integration.md`
+- `references/clink-integ-cli-integration.md`
 - `references/standard-integration.md`
 - `references/elements-integration.md` when the request mentions Elements, embedded checkout, SDK iframe components, `loadClinkElements`, `paymentMethod`, `currencySelect`, or Elements events
 
@@ -181,7 +181,7 @@ After drafting the answer, review it with:
 - read only the modules needed for the current task
 - draft the scenario-specific solution first, then generate or review the output artifacts, then use `references/review-checklist.md` as the final self-review pass
 - for new user onboarding, guide only from docs-confirmed account, dashboard, API key, product, webhook, and first checkout facts, then route the user to the appropriate implementation path
-- for clink-dev-cli work, install or verify the latest GitHub CLI, check `clink env list --help`, `clink env add --help`, `clink auth secret set --help`, `clink api request --help`, `clink catalog import --help`, `clink webhook endpoint ensure --help`, confirm catalog help supports `imageId`/`imageUrl`/`imageFile` and webhook endpoint ensure help supports `--sync-env-file`, and, for local desktop fallback only, `clink dashboard apikey ensure-secret --help`
+- for clink-integ-cli work, install or verify the latest GitHub CLI, check `clink env list --help`, `clink env add --help`, `clink auth secret set --help`, `clink api request --help`, `clink catalog import --help`, `clink webhook endpoint ensure --help`, confirm catalog help supports `imageId`/`imageUrl`/`imageFile` and webhook endpoint ensure help supports `--sync-env-file`, and, for local desktop fallback only, `clink dashboard apikey ensure-secret --help`
 - for CLI request-domain switching, prefer named environments through `clink env list`, `clink env show <name> --json`, `clink env add <name> --api-base-url <url>`, `--env <name>`, or `CLINK_ENV`; use `--base-url` or `CLINK_BASE_URL` only for one-off debugging overrides, and never to bypass the production validation gate
 - when a local desktop environment has a browser and no existing Secret Key, run `clink login`, pause for the human to complete Dashboard login, then run `clink dashboard whoami --json` and `clink dashboard apikey ensure-secret --save --json` to create or resolve the sandbox Secret Key and save it to the CLI profile
 - when the merchant app runtime itself needs `CLINK_SECRET_KEY`, use `clink dashboard apikey ensure-secret --save --show-secret --json` only in a controlled local secret-write step; write the value to an ignored `.env`, platform Secret, or secret manager, and never echo it in final output
@@ -242,7 +242,7 @@ After drafting the answer, review it with:
 ## Module Map
 
 - `references/retrieval-protocol.md`
-- `references/clink-dev-cli-integration.md`
+- `references/clink-integ-cli-integration.md`
 - `references/new-user-onboarding.md`
 - `references/standard-integration.md`
 - `references/elements-integration.md`

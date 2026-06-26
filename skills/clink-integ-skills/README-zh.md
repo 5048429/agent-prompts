@@ -2,7 +2,7 @@
 
 [English](README.md) | 简体中文
 
-`clink-integ-skills` 是一个给 coding agent 使用的 ClinkBill 支付接入 skill。当前版本已经切到 CLI-first：agent 应优先使用 `clink-dev-cli`、Secret Key 身份验证、商品目录导入、checkout 或 subscription API、webhook endpoint 自动配置、webhook 签名校验和 UAT 验证来完成接入。
+`clink-integ-skills` 是一个给 coding agent 使用的 ClinkBill 支付接入 skill。当前版本已经切到 CLI-first：agent 应优先使用 `clink-integ-cli`、Secret Key 身份验证、商品目录导入、checkout 或 subscription API、webhook endpoint 自动配置、webhook 签名校验和 UAT 验证来完成接入。
 
 这个仓库既是可安装的 skill，也是可以发给 agent 的提示词包。`agents/openai.yaml` 里有默认提示词，`references/agent-prompt.zh-CN.md` 和 `references/universal-agent-prompt.zh-CN.md` 里有更完整的中文提示词参考。
 
@@ -13,7 +13,7 @@
 本地桌面环境里，如果用户还没有提供 Secret Key，且 agent 可以打开浏览器，可以运行：
 
 ```bash
-npm install --prefix ./.clink-tools github:5048429/clink-dev-cli
+npm install --prefix ./.clink-tools github:5048429/clink-integ-cli
 ./.clink-tools/node_modules/.bin/clink --version
 ./.clink-tools/node_modules/.bin/clink --help
 ```
@@ -21,7 +21,7 @@ npm install --prefix ./.clink-tools github:5048429/clink-dev-cli
 如果明确要使用全局 npm，请带上 `--install-links=true`：
 
 ```bash
-npm install -g --install-links=true github:5048429/clink-dev-cli
+npm install -g --install-links=true github:5048429/clink-integ-cli
 clink login
 clink dashboard whoami --json
 clink dashboard apikey ensure-secret --save --json
@@ -33,7 +33,7 @@ clink auth status --json
 云环境、低代码、sandbox 或无浏览器环境里，用户只需要提供一次 `CLINK_SECRET_KEY`，然后 agent 配置 CLI：
 
 ```bash
-npm install --prefix ./.clink-tools github:5048429/clink-dev-cli
+npm install --prefix ./.clink-tools github:5048429/clink-integ-cli
 export CLINK_SECRET_KEY=sk_test_xxx
 clink auth secret set --api-key env:CLINK_SECRET_KEY --env sandbox
 clink auth status --json
@@ -75,7 +75,7 @@ clink webhook endpoint ensure \
 可以直接使用这个短提示词：
 
 ```text
-Use $clink-integ-skills to integrate ClinkBill payments into this project with clink-dev-cli, Secret Key setup, product catalog import, checkout/subscription APIs, webhook endpoint automation, and UAT validation.
+Use $clink-integ-skills to integrate ClinkBill payments into this project with clink-integ-cli, Secret Key setup, product catalog import, checkout/subscription APIs, webhook endpoint automation, and UAT validation.
 ```
 
 skill 本身会指导 agent 根据任务读取标准接入、onboarding、校验、Elements、通用 agent payment skill 和 OpenClaw payment skill 的对应 reference。
@@ -104,7 +104,7 @@ skill 本身默认不需要额外安装运行时依赖。
 |---|---|
 | `SKILL.md` | 主路由规则和硬约束 |
 | `agents/openai.yaml` | Agent UI 元信息和默认提示词 |
-| `references/clink-dev-cli-integration.md` | CLI-first Secret Key、商品目录、checkout、webhook、UAT 工作流 |
+| `references/clink-integ-cli-integration.md` | CLI-first Secret Key、商品目录、checkout、webhook、UAT 工作流 |
 | `references/standard-integration.md` | 标准 Clink 接入工作流 |
 | `references/new-user-onboarding.md` | 新用户 onboarding 和首次 sandbox checkout 工作流 |
 | `references/agent-prompt.zh-CN.md` | 中文 agent 提示词参考 |

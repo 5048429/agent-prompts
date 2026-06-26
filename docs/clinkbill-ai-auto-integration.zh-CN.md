@@ -1,6 +1,6 @@
 # ClinkBill AI 自动接入介绍
 
-这份文档面向希望用 AI agent 接入 ClinkBill 支付的商户、开发者和低代码平台用户。它说明 ClinkBill 的自动接入方案如何工作、哪些步骤可以自动完成、哪些步骤仍需要人工参与，以及 agent 应如何使用 `clink-integ-skills` 和 `clink-dev-cli` 完成可靠的 sandbox 集成。
+这份文档面向希望用 AI agent 接入 ClinkBill 支付的商户、开发者和低代码平台用户。它说明 ClinkBill 的自动接入方案如何工作、哪些步骤可以自动完成、哪些步骤仍需要人工参与，以及 agent 应如何使用 `clink-integ-skills` 和 `clink-integ-cli` 完成可靠的 sandbox 集成。
 
 ## 适用场景
 
@@ -18,7 +18,7 @@ AI 自动接入适用于：
 ClinkBill AI 自动接入由两部分组成：
 
 - `clink-integ-skills`：给 coding agent 使用的接入知识包。它约束 agent 如何识别项目架构、发现商品、设计 checkout/subscription/webhook 流程，并避免把密钥放到前端或公开文件里。
-- `clink-dev-cli`：给 agent 和开发者执行的命令行工具。它用 Secret Key 调用 Clink API，完成产品和价格导入、checkout 创建、webhook endpoint 管理、签名模拟、本地验证和 smoke test。
+- `clink-integ-cli`：给 agent 和开发者执行的命令行工具。它用 Secret Key 调用 Clink API，完成产品和价格导入、checkout 创建、webhook endpoint 管理、签名模拟、本地验证和 smoke test。
 
 目标是：除 Secret Key 获取或本地 Dashboard 登录外，尽量自动完成 sandbox 支付接入。用户不应该被要求手动创建 product、price、webhook endpoint，也不应该在初始接入时手动提供 `CLINK_WEBHOOK_SIGNING_KEY`。
 
@@ -27,7 +27,7 @@ ClinkBill AI 自动接入由两部分组成：
 Agent 通常可以自动完成：
 
 - 安装或读取 `clink-integ-skills`。
-- 安装最新 `clink-dev-cli` 并检查命令能力。
+- 安装最新 `clink-integ-cli` 并检查命令能力。
 - 识别项目后端、路由、环境变量和购买入口。
 - 扫描已有付费产品、订阅套餐、价格页、配置或 CMS 数据。
 - 生成 `clink-catalog.json`，并用 CLI 校验、计划、导入产品和价格。

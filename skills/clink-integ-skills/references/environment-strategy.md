@@ -35,7 +35,7 @@ The skill resolves the mapping internally before generating any code. The develo
 
 ## CLI Request-Domain Environments
 
-`clink-dev-cli` also has a request-domain environment registry. This is a CLI routing mechanism, not a separate user-facing readiness state.
+`clink-integ-cli` also has a request-domain environment registry. This is a CLI routing mechanism, not a separate user-facing readiness state.
 
 Built-in CLI environments map to API base URLs with the CLI's required `/api/` path:
 

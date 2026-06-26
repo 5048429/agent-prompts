@@ -12,7 +12,7 @@
 
 - https://github.com/5048429/agent-prompts/tree/main/skills/clink-integ-skills
 - https://docs.clinkbill.com/api-reference/introduction
-- https://github.com/5048429/clink-dev-cli
+- https://github.com/5048429/clink-integ-cli
 
 如果资料中字段与本提示词不一致，以官方文档和当前 CLI 输出为准，并在最终回复中说明差异。
 
@@ -21,7 +21,7 @@
 不要使用 `node dist/index.js`。先安装并使用最新 `clink`。低代码/沙箱环境需要 CLI 支持 `clink auth secret set`，所以安装后必须检查命令能力：
 
 ```bash
-npm install --prefix ./.clink-tools github:5048429/clink-dev-cli
+npm install --prefix ./.clink-tools github:5048429/clink-integ-cli
 ./.clink-tools/node_modules/.bin/clink auth secret set --help
 ./.clink-tools/node_modules/.bin/clink api request --help
 ./.clink-tools/node_modules/.bin/clink catalog import --help
@@ -38,7 +38,7 @@ npm install --prefix ./.clink-tools github:5048429/clink-dev-cli
 如果你确认当前机器全局 npm 可用，也可以全局安装；全局安装必须带 `--install-links=true`，用于规避部分 npm/Windows 环境对 GitHub 依赖生成失效 junction 的问题：
 
 ```bash
-npm install -g --install-links=true github:5048429/clink-dev-cli
+npm install -g --install-links=true github:5048429/clink-integ-cli
 ```
 
 GitHub 安装应使用 CLI 仓库已提交的 `dist/` 产物；不要因为缺少 Node 类型声明就在业务项目里补 TypeScript 构建依赖。
