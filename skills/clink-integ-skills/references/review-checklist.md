@@ -30,6 +30,7 @@ This file is for final review and self-check. It is not the primary workflow doc
 - does the design avoid treating `merchantReferenceId` as an idempotency key
 - does the design keep `originalAmount` aligned with the merchant-defined checkout payload
 - does webhook implementation include endpoint registration through `clink webhook endpoint ensure --events core --save-secret --json` or a clearly identified fallback
+- when Dashboard webhook visibility or manual fallback is mentioned, does the output identify `Merchant Dashboard > Developers > Webhooks` while keeping `clink webhook endpoint ensure` as the default path
 - does webhook setup sync the returned or rotated signing secret into the merchant runtime as `CLINK_WEBHOOK_SIGNING_KEY`
 - for local `.env` apps, does webhook setup use `clink webhook endpoint ensure --save-secret --sync-env-file <env-file>` or an equivalent automated env write
 - does webhook setup restart or redeploy the service after syncing the signing secret

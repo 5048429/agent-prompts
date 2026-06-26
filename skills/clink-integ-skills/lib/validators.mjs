@@ -75,7 +75,6 @@ export function lintWebhookDesign(input) {
     ["event subscription", ["events core", "subscribe to required events", "webhook subscription", "select the event types"]],
     ["signing key", ["clink_webhook_signing_key", "signing key", "webhook signing key"]],
     ["signing key sync", ["sync", "synchronize", "write", "store", "platform secret", "secret manager"]],
-    ["service restart or redeploy", ["restart", "redeploy", "re deploy"]],
     ["timestamp verification", ["x clink timestamp"]],
     ["signature verification", ["x clink signature", "signature verification"]],
     ["idempotency", ["idempotency", "idempotent"]],
@@ -83,9 +82,38 @@ export function lintWebhookDesign(input) {
     ["out-of-order tolerance", ["out of order", "out-of-order"]],
   ];
 
+  const hasSigningKeySync = ["sync", "synchronize", "write", "store", "platform secret", "secret manager"]
+    .some((token) => text.includes(normalize(token)));
+  const hasSigningKeyRetrieval = [
+    "clink webhook endpoint ensure",
+    "--save-secret",
+    "returned webhook signing key",
+    "returned or rotated signing secret",
+    "returned or rotated webhook signing secret",
+    "copy the webhook signing key",
+    "copy webhook signing key",
+    "copying the endpoint signing key",
+    "select the registered endpoint",
+    "register or select the https endpoint",
+  ].some((token) => text.includes(normalize(token)));
+  const hasServiceRestart = ["restart", "redeploy", "re deploy"]
+    .some((token) => text.includes(normalize(token)));
+
   for (const [label, tokens] of requiredChecks) {
     const ok = tokens.some((token) => text.includes(normalize(token)));
     if (!ok) errors.push(`Missing required webhook control: ${label}`);
+  }
+
+  if (!hasServiceRestart) {
+    if (!hasSigningKeySync) {
+      errors.push("Missing required webhook control: service restart or redeploy");
+    } else {
+      warnings.push("After syncing CLINK_WEBHOOK_SIGNING_KEY, restart or redeploy the service before verification");
+    }
+  }
+
+  if (!hasSigningKeyRetrieval) {
+    errors.push("Missing required webhook control: signing key retrieval method");
   }
 
   if (!text.includes("https")) {

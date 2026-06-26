@@ -125,6 +125,8 @@ Webhook implementation includes endpoint setup, signing secret configuration, an
 
 The workflow should prefer `clink-dev-cli` with Secret Key authentication.
 
+The Dashboard location for viewing existing endpoint records is `Merchant Dashboard > Developers > Webhooks`, but new standard integration guidance should stay CLI-first and use the Secret Key API through `clink webhook endpoint ensure` whenever available.
+
 First ensure the CLI can authenticate:
 
 ```bash
