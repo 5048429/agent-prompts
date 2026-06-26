@@ -192,6 +192,7 @@ After drafting the answer, review it with:
 - for standard integration, clarify product mode before designing checkout creation
 - for Elements integration, treat Elements as a Standard Integration frontend path, not a hosted checkout page or separate top-level integration route
 - for Elements implementation, keep order creation and checkout session creation on the server, use only frontend-safe `publishKey`, `environment`, and `sessionId` in browser code, and keep webhook reconciliation authoritative
+- for Elements implementation, inspect the merchant site's colors, design tokens, CSS variables, theme config, computed styles, and radius scale when available, then map them into frontend-safe Elements `presetOptions`
 - for Elements frontend-only implementation, identify or ask for the frontend framework before writing framework-specific code
 - for merchant skill for OpenClaw integration, separate merchant skill, merchant server, and `openclaw-payment-skills` responsibilities
 - for merchant skill for generic agent integration, separate merchant skill or tool, agent runtime, adapter, merchant server, `agentic-payment-skills`, callback, and resume responsibilities
@@ -230,6 +231,7 @@ After drafting the answer, review it with:
 - do not assume a public refund-create API unless local docs explicitly show one
 - do not describe merchant skill integration as a plain checkout redirect flow
 - do not describe Elements as hosted checkout, and do not make modal checkout the default Elements layout
+- do not leave Elements styling on generic defaults when the merchant site's colors or design tokens are discoverable; adapt `theme`, `primaryColor`, `radius`, and skeleton behavior through `presetOptions`
 - do not put Secret Key, webhook signing key, server SDK calls, merchant order creation, or checkout session creation into browser-side Elements guidance
 - do not treat `session-success`, `session-pending`, `successUrl`, or iframe callback behavior as authoritative payment confirmation
 - do not invert `submit-enabled`; `true` means the host can submit, so disabled UI must be derived as `!enabled` plus local loading or initialization state

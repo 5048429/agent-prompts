@@ -79,6 +79,8 @@ const moduleExpectations = [
       "@clink-ai/clink-elements",
       "loadClinkElements",
       "amount-change",
+      "computed styles",
+      "presetOptions",
       "--dependency openclaw-payment-skills",
       "--dependency agentic-payment-skills",
       "guidance artifacts",
@@ -122,7 +124,10 @@ const moduleExpectations = [
       "order.succeeded",
       "invoice.paid",
       "cloudflared",
-      "checkoutUrl"
+      "checkoutUrl",
+      "4242424242424242",
+      "3-digit CVC",
+      "future expiry"
     ]
   },
   {
@@ -220,7 +225,10 @@ const moduleExpectations = [
       "references/elements-integration.md",
       "loadClinkElements",
       "paymentMethod",
-      "currencySelect"
+      "currencySelect",
+      "4242424242424242",
+      "3-digit CVC",
+      "future expiry"
     ]
   },
   {
@@ -234,6 +242,11 @@ const moduleExpectations = [
       "Drawer/Side panel",
       "Multi-step checkout",
       "Headless host UI",
+      "Brand Matching And Theme Adaptation",
+      "CSS variables",
+      "computed styles",
+      "primaryColor",
+      "presetOptions",
       "useClinkElementsPayment",
       "submitEnabled",
       "submit-visible",
@@ -359,6 +372,7 @@ const moduleExpectations = [
       "production promotion plan",
       "base URL",
       "elements_frontend_checklist",
+      "elements_brand_theme_plan",
       "promotion_code_ui_contract"
     ]
   },

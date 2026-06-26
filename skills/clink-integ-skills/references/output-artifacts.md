@@ -29,6 +29,7 @@ When Elements is in scope, add:
 - `elements_event_mapping` for `submit-enabled` as can-submit (`true` enables host submission), `submit-visible`, `amount-change`, `session-init-success`, `session-success`, `session-pending`, `promo-code-error`, and `error`
 - `elements_error_handling_checklist` for API validation, expired session, completed session, unsupported session UI mode, and load failure
 - `elements_host_ui_todo` for React, Vue, native JS, or the inferred frontend framework
+- `elements_brand_theme_plan` for adapting Elements `presetOptions` from site colors, design tokens, CSS variables, computed styles, and radius scale
 - `elements_layout_recipe` for inline, modal, drawer, or multi-step checkout layout selection
 - `elements_lifecycle_checklist` for session-to-instance mapping, destroy/re-init, async teardown, and route or modal cleanup
 - `elements_server_client_boundary` for server-created session, frontend-safe config, browser-only SDK code, and webhook authority

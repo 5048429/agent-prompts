@@ -28,6 +28,12 @@ const PRODUCTION_SIGNALS = [
   "use prod",
 ];
 
+const PRODUCTION_PATTERNS = [
+  /\bdeploy\b[\s\S]{0,80}\bto\s+production\b/,
+  /\brelease\b[\s\S]{0,80}\bto\s+production\b/,
+  /\bpromote\b[\s\S]{0,80}\bto\s+production\b/,
+];
+
 const SANDBOX_SIGNALS = [
   "switch back to sandbox",
   "切回沙箱",
@@ -99,6 +105,27 @@ const FRONTEND_FRAMEWORK_SIGNALS = [
   "angular",
 ];
 
+const CATALOG_IMPORT_SIGNALS = [
+  "pricing page",
+  "products and prices",
+  "create products and prices",
+  "subscription plans",
+  "subscription business",
+  "catalog import",
+  "clink catalog",
+  "clink-catalog",
+  "paid products",
+  "product images",
+  "product catalog",
+  "price page",
+  "价格页",
+  "付费商品",
+  "商品图片",
+  "订阅套餐",
+  "商品目录",
+  "自动导入",
+];
+
 export function getEnvironmentSignals(haystackInput) {
   const haystack = normalize(haystackInput);
   return {
@@ -107,7 +134,7 @@ export function getEnvironmentSignals(haystackInput) {
         return /\buse\s+prod\b/.test(haystack);
       }
       return haystack.includes(normalize(token));
-    }),
+    }) || PRODUCTION_PATTERNS.some((pattern) => pattern.test(haystack)),
     sandbox: SANDBOX_SIGNALS.some((token) => haystack.includes(normalize(token))),
   };
 }
@@ -218,9 +245,64 @@ function combinedRuntimeText(prompt, contextBlocks = []) {
   return [prompt, ...contextBlocks.map((item) => item.content || item)].join("\n");
 }
 
+function hasCatalogImportSignals(input) {
+  const haystack = normalize(input);
+  return CATALOG_IMPORT_SIGNALS.some((token) => haystack.includes(normalize(token)));
+}
+
+function isSandboxUatPaymentValidationRequest(input) {
+  const haystack = normalize(input);
+  return (
+    /\b(payment|checkout)\b/.test(haystack) &&
+    /\b(validation|validate|verification|verify|test)\b/.test(haystack) &&
+    (haystack.includes("sandbox") || haystack.includes("uat"))
+  );
+}
+
+function isDocsOnlyQuestion(input) {
+  const haystack = normalize(input);
+  return (
+    haystack.includes("do not write code") ||
+    haystack.includes("no code") ||
+    haystack.includes("without code") ||
+    haystack.includes("official docs only") ||
+    haystack.includes("using official docs only") ||
+    haystack.includes("based on official clink docs only")
+  );
+}
+
+function isStandardImplementationWorkflow(input) {
+  const haystack = normalize(input);
+  if (isDocsOnlyQuestion(haystack)) return false;
+  const action = /\b(implement|sync|synchronize|consume|handle|create|get|cancel|query)\b/.test(haystack);
+  const standardDomain = [
+    "order sync",
+    "order webhook",
+    "order webhooks",
+    "get /order",
+    "subscription",
+    "invoice webhook",
+    "invoice webhooks",
+    "products and prices",
+    "checkout integration",
+  ].some((token) => haystack.includes(token));
+  return action && standardDomain;
+}
+
+function isNonClinkPaymentPrompt(input) {
+  const haystack = normalize(input);
+  const mentionsOtherPsp = /\b(stripe|paypal|adyen|braintree|square|checkout\.com)\b/.test(haystack);
+  const mentionsClink = /\b(clink|clinkbill)\b/.test(haystack);
+  return mentionsOtherPsp && !mentionsClink;
+}
+
 export function detectRoute({ prompt, contextBlocks = [] }) {
   const haystack = normalize([prompt, ...contextBlocks.map((item) => item.content || item)].join("\n"));
   const signals = getRouteSignals(haystack);
+
+  if (isNonClinkPaymentPrompt(haystack)) {
+    return "none";
+  }
 
   if (signals.comparison) {
     return "comparison";
@@ -228,6 +310,18 @@ export function detectRoute({ prompt, contextBlocks = [] }) {
 
   if (signals.review) {
     return "review";
+  }
+
+  if (isDocsOnlyQuestion(haystack)) {
+    return "documentation_dialogue";
+  }
+
+  if (isSandboxUatPaymentValidationRequest(haystack)) {
+    return "merchant_standard_integration";
+  }
+
+  if (hasCatalogImportSignals(haystack)) {
+    return "merchant_standard_integration";
   }
 
   if (signals.validation) {
@@ -240,6 +334,10 @@ export function detectRoute({ prompt, contextBlocks = [] }) {
 
   if (signals.agent > signals.standard) {
     return "merchant_agent_integration";
+  }
+
+  if (isStandardImplementationWorkflow(haystack)) {
+    return "merchant_standard_integration";
   }
 
   if (signals.documentation) {
@@ -266,6 +364,14 @@ export function getRouteSignals(haystackInput) {
       "catalog import",
       "clink catalog",
       "merchantreferenceid",
+      "order sync",
+      "get /order",
+      "subscription",
+      "invoice",
+      "价格页",
+      "付费商品",
+      "商品目录",
+      "订阅套餐",
     ].filter((token) => haystack.includes(token)).length + elements,
     agent: [
       "payment handoff",
@@ -273,6 +379,13 @@ export function getRouteSignals(haystackInput) {
       "customer verify",
       "customer.verify",
       "merchant agent",
+      "agentic-payment-skills",
+      "clink-payment-skill",
+      "clink-cli",
+      "generic agent",
+      "non-openclaw",
+      "binding-link",
+      "customerapikey",
       "confirm_tool",
       "confirm_args",
       "/order/payment-session",
@@ -297,8 +410,14 @@ export function getRouteSignals(haystackInput) {
     ].filter((token) => haystack.includes(normalize(token))).length,
     documentation: [
       "official docs",
+      "official clink docs",
+      "using official docs",
+      "public api",
+      "api docs",
+      "docs only",
       "api field",
       "documented contract",
+      "contract details",
       "what does this field",
       "show me the public api",
       "which endpoint",
@@ -412,7 +531,7 @@ export function detectProductMode(prompt) {
   if (haystack.includes("already created in clink dashboard") || haystack.includes("productid") || haystack.includes("priceid") || haystack.includes("registered product")) {
     return "registered";
   }
-  if (haystack.includes("pricing page") || haystack.includes("subscription plans") || haystack.includes("catalog import") || haystack.includes("clink catalog")) {
+  if (hasCatalogImportSignals(haystack)) {
     return "registered";
   }
   if (haystack.includes("do not want to create products") || haystack.includes("priceDataList".toLowerCase()) || haystack.includes("inline order")) {
@@ -425,6 +544,8 @@ export function requiresDocsGate({ route, prompt }) {
   const haystack = normalize(prompt);
   if (route === "documentation_dialogue") return true;
   if (route === "merchant_new_user_onboarding") return true;
+  if (haystack.includes("refund") && (haystack.includes("docs") || haystack.includes("public api") || haystack.includes("create refund api"))) return true;
+  if (haystack.includes("api docs") || haystack.includes("using official docs") || haystack.includes("check docs")) return true;
   if (haystack.includes("public api") || haystack.includes("endpoint") || haystack.includes("field") || haystack.includes("schema")) return true;
   if (haystack.includes("official docs") || haystack.includes("documented contract")) return true;
   return false;
@@ -440,6 +561,14 @@ function appendRuntimeNote(state, note) {
     ...state,
     notes: [...state.notes, note],
   };
+}
+
+function shouldAddSandboxCardBindingTestNote({ route, runtimeState }) {
+  return (
+    route === "merchant_standard_integration" &&
+    runtimeState?.resolvedEnvironment === "sandbox" &&
+    runtimeState?.promotionStatus !== "failed"
+  );
 }
 
 const DEFAULT_ARTIFACT_POLICY = {
@@ -535,6 +664,7 @@ export function buildArtifacts({
         buildArtifact("elements_event_mapping", null, "Map submit-enabled as can-submit, not disabled; map submit-visible, amount-change, session-init-success, session-success, session-pending, promo-code-error, and error into host UI state"),
         buildArtifact("elements_error_handling_checklist", null, "Handle API validation, expired session, completed session, unsupported Elements session mode, and load failure"),
         buildArtifact("elements_host_ui_todo", null, "Implement the host UI for the selected frontend framework without coupling SDK orchestration to a fixed layout"),
+        buildArtifact("elements_brand_theme_plan", null, "Inspect site colors, design tokens, CSS variables, Tailwind or theme config, computed styles, and border radii; map the matched theme, primaryColor, radius, and host skeleton choices into Elements presetOptions"),
         buildArtifact("elements_layout_recipe", null, hasElementsLayoutSignals(combinedText)
           ? "Select and document the requested Elements layout recipe such as inline, modal, drawer, or multi-step checkout"
           : "Choose an Elements layout recipe instead of defaulting to modal checkout"),
@@ -678,10 +808,20 @@ export async function runSkillRuntime({
       runtimeState,
       "Prefer clink webhook endpoint ensure --events core --save-secret --json for endpoint management, then sync CLINK_WEBHOOK_SIGNING_KEY into the app runtime and restart or redeploy."
     );
+    if (shouldAddSandboxCardBindingTestNote({ route, runtimeState })) {
+      runtimeState = appendRuntimeNote(
+        runtimeState,
+        "After sandbox/UAT integration is ready, card-binding payment tests can use test card 4242424242424242 with any 3-digit CVC and any future expiry date; do not use this guidance for production or claim payment success before real UAT payment and merchant fulfillment checks complete."
+      );
+    }
     if (hasElementsSignals(combinedText)) {
       runtimeState = appendRuntimeNote(
         runtimeState,
         "Elements is an embedded payment component, not hosted checkout; webhook-driven server reconciliation remains authoritative."
+      );
+      runtimeState = appendRuntimeNote(
+        runtimeState,
+        "When site styling is available, adapt Elements presetOptions to match the merchant site colors, theme, and radii using design tokens or computed styles before inventing a palette."
       );
     }
     if (hasElementsSignals(combinedText) && hasClientOnlyFrameworkSignals(combinedText)) {
@@ -696,6 +836,13 @@ export async function runSkillRuntime({
     runtimeState = appendRuntimeNote(
       runtimeState,
       "Do not treat this path as a plain checkout redirect flow."
+    );
+  }
+
+  if (route === "review" && normalize(combinedText).includes("webhook")) {
+    runtimeState = appendRuntimeNote(
+      runtimeState,
+      "Keep clink webhook endpoint ensure as the primary setup path; Merchant Dashboard > Developers > Webhooks is only a fallback, manual, legacy, or visibility path."
     );
   }
 
@@ -753,7 +900,7 @@ export async function runSkillRuntime({
 
     if (
       /refund/.test(normalize(prompt)) &&
-      /public api/.test(normalize(prompt)) &&
+      (/public api/.test(normalize(prompt)) || /create refund api/.test(normalize(prompt))) &&
       !normalize(docsResult.contents).includes("/refund/create")
     ) {
       runtimeState = appendRuntimeNote(

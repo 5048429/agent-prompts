@@ -47,6 +47,7 @@ This file is for final review and self-check. It is not the primary workflow doc
 - does webhook reconciliation match both `merchantReferenceId` and `sessionId` when both are available, and quarantine mismatches instead of relying on one field
 - does the design avoid treating `successUrl` as the only confirmation signal
 - does real-payment validation require local order paid/completed plus entitlement/fulfillment completion, not just webhook HTTP 200
+- after a sandbox/UAT integration is ready for card-binding payment testing, does the final delivery remind the user about test card `4242424242424242`, any 3-digit CVC, and any future expiry date without presenting it as production guidance
 - does the design clearly separate payment confirmation from merchant fulfillment when downstream delivery exists
 - does refund handling describe lifecycle behavior instead of assuming unsupported create APIs
 
@@ -74,6 +75,7 @@ This file is for final review and self-check. It is not the primary workflow doc
 - does it handle known SDK errors and give the user a retry or session recreation path
 - does it document whether SDK skeleton or host skeleton is used
 - does it check host containers for stable sizing, scrolling, and mobile button placement
+- does it inspect the merchant site's colors, design tokens, CSS variables, theme config, computed styles, and radius scale, then map them into Elements `presetOptions`
 
 ## New User Onboarding Checks
 

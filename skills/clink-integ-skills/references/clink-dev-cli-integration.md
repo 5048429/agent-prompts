@@ -329,6 +329,8 @@ clink smoke-test --webhook-url <public-webhook-url>/api/clink/webhook --json
 5. Real UAT checkout session creation.
 6. Real UAT payment only after someone opens the returned `checkoutUrl` and completes payment.
 
+After the sandbox/UAT integration is ready for card-binding payment testing, remind the user that the card number `4242424242424242` can be used with any 3-digit CVC and any future expiry date. This is test-payment guidance only; never present it as production card guidance.
+
 Never claim a real payment webhook was completed unless a real UAT payment was completed.
 Webhook 200 is not sufficient for real-payment completion. The final real-payment checklist must confirm the local order matched by both `merchantReferenceId` and `sessionId` is paid/completed, and the merchant entitlement, credits, shipment, download access, or other fulfillment is complete.
 
@@ -352,6 +354,7 @@ Provide:
 - CLI verification summary
 - webhook endpoint URL
 - tunnel URL if one is still running
+- sandbox/UAT card-binding test reminder when the user needs to complete a test payment: `4242424242424242`, any 3-digit CVC, and any future expiry date
 - remaining human steps; normally this should be limited to local Dashboard login completion or cloud Secret Key provisioning, plus opening `checkoutUrl` for a real UAT payment when needed
 
 Do not include real Secret Keys, webhook signing keys, Dashboard tokens, checkout credentials, or payment method data in the final answer.
