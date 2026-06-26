@@ -1,4 +1,4 @@
-# Clink Dev CLI Integration
+# Clink Integ CLI Integration
 
 ## Purpose
 
