@@ -1,9 +1,13 @@
 # ClinkBill 一段式建站 Agent 提示词
 
-把下面这一段直接复制给任意可以帮你构建、修改或部署网站的 AI agent。它会同时要求 agent 安装/读取 skill，并立刻按 skill 接入 Clink 支付。
+把下面这一段直接复制给任意可以帮你构建、修改或部署网站的 AI agent。它会优先使用当前环境里已经安装或内置的 `$clink-integ-skills`；只有找不到该 skill 时，才要求 agent 从仓库安装或读取。
 
 ```text
-请先安装或读取 Clink 支付接入 skill：
+请先检查当前环境是否已经支持或已安装 Clink 支付接入 skill：$clink-integ-skills。
+
+如果 $clink-integ-skills 已可用，直接使用它帮我把 ClinkBill 支付接入到当前项目，不要让我再从仓库下载或安装 skill，也不要要求我发送第二段提示词。
+
+如果 $clink-integ-skills 不可用，但你的运行环境支持安装或读取 skill，再从下面地址安装或读取：
 https://github.com/5048429/agent-prompts/tree/main/skills/clink-integ-skills
 
 安装/读取完成后，立即使用 $clink-integ-skills 帮我把 ClinkBill 支付接入到当前项目。

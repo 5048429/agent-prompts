@@ -8,9 +8,14 @@
 
 ## 资料
 
-请先读取：
+如果当前环境已经支持或已加载 `$clink-integ-skills`，不要再下载或重新读取 skill 仓库；直接按当前 skill 执行接入。
+
+只有当 `$clink-integ-skills` 不可用、但当前 agent 支持读取远程资料时，才读取 skill 仓库：
 
 - https://github.com/5048429/agent-prompts/tree/main/skills/clink-integ-skills
+
+无论是否已加载 skill，涉及 API 字段、请求路径或 CLI 参数时，都以官方文档和当前 CLI 输出为准：
+
 - https://docs.clinkbill.com/api-reference/introduction
 - https://github.com/5048429/clink-integ-cli
 

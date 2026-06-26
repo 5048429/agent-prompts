@@ -2,13 +2,15 @@
 
 帮我把 ClinkBill 支付接入到当前项目。
 
-如果你支持 skills，请先安装或读取 skill，然后立即使用它完成接入，不要要求用户再发送第二段提示词：
+如果你支持 skills，请先检查当前环境是否已经支持或已安装 `$clink-integ-skills`。如果已可用，直接使用它完成接入，不要要求用户再从仓库下载或安装 skill，也不要要求用户再发送第二段提示词。
+
+只有当 `$clink-integ-skills` 不可用、但你的运行环境支持安装或读取 skill 时，才从下面地址安装或读取：
 
 ```text
 https://github.com/5048429/agent-prompts/tree/main/skills/clink-integ-skills
 ```
 
-安装/读取后使用：
+安装/读取后立即使用：
 
 ```text
 $clink-integ-skills
