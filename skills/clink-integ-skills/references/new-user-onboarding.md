@@ -84,9 +84,12 @@ For generated code or configuration, use a placeholder such as `CLINK_SECRET_KEY
 In browserless, cloud IDE, low-code, or sandbox environments, the allowed manual step is for the user to provide the Secret Key to the agent so it can store it in the secure runtime environment and CLI profile:
 
 ```bash
+clink env show sandbox --json
 clink auth secret set --api-key env:CLINK_SECRET_KEY --env sandbox
 clink auth status --json
 ```
+
+If the user or maintainer provides a named non-production request domain, register it with `clink env add <name> --api-base-url <url>` first, confirm it with `clink env show <name> --json`, and use `--env <name>` or `CLINK_ENV=<name>` for CLI commands. Keep the onboarding readiness language as sandbox unless production approval and the production validation gate apply.
 
 In a local desktop environment with an available browser, the agent may bootstrap the Secret Key through `clink login` instead:
 

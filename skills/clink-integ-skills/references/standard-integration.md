@@ -130,9 +130,12 @@ The Dashboard location for viewing existing endpoint records is `Merchant Dashbo
 First ensure the CLI can authenticate:
 
 ```bash
+clink env show sandbox --json
 clink auth secret set --api-key env:CLINK_SECRET_KEY --env sandbox
 clink auth status --json
 ```
+
+Use `sandbox` unless the user or maintainer has explicitly provided a registered custom non-production CLI environment. For a custom request domain, first run `clink env add <name> --api-base-url <url>`, confirm it with `clink env show <name> --json`, and then pass `--env <name>` or set `CLINK_ENV=<name>`. Use `--base-url` or `CLINK_BASE_URL` only as a documented one-off override.
 
 Then configure the public HTTPS endpoint:
 
@@ -168,6 +171,7 @@ Server-side API calls require a Clink Secret Key.
 If a Secret Key already exists in the runtime environment, configure the CLI profile with:
 
 ```bash
+clink env show sandbox --json
 clink auth secret set --api-key env:CLINK_SECRET_KEY --env sandbox
 clink auth status --json
 ```

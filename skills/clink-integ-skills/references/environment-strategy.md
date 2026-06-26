@@ -33,6 +33,35 @@ The current base URL mapping is:
 
 The skill resolves the mapping internally before generating any code. The developer sees the correct base URL in the generated code itself, not as separate metadata.
 
+## CLI Request-Domain Environments
+
+`clink-dev-cli` also has a request-domain environment registry. This is a CLI routing mechanism, not a separate user-facing readiness state.
+
+Built-in CLI environments map to API base URLs with the CLI's required `/api/` path:
+
+- `sandbox` -> `https://uat-api.clinkbill.com/api/`
+- `production` -> `https://api.clinkbill.com/api/`
+
+The agent should verify CLI routing with:
+
+```bash
+clink env list
+clink env show sandbox --json
+clink --env sandbox auth status --json
+```
+
+When a maintainer provides a non-production request domain, register it as a custom CLI environment:
+
+```bash
+clink env add staging --api-base-url https://staging-api.clinkbill.com/api/
+clink env show staging --json
+clink --env staging auth status --json
+```
+
+Custom environment names may be useful for staging, preview, regional, or private test domains, but they do not relax the skill's production gate. If a custom environment points at production or a production-like request domain, treat it as production for validation purposes.
+
+Prefer named environments through `--env <name>` or `CLINK_ENV`. Use `--base-url` or `CLINK_BASE_URL` only for a documented one-off override.
+
 ## Default Behavior
 
 `clink-integ-skills` is a developer integration skill. Its default behavior should be:
@@ -111,6 +140,8 @@ Before producing any developer-facing output, the skill must:
 3. resolve `base_url` (`https://uat-api.clinkbill.com` or `https://api.clinkbill.com`)
 
 All generated code, configuration files, and examples must use the resolved base URL. The developer sees the correct environment reflected in the code itself, not as a separate metadata block.
+
+For CLI commands, also resolve the CLI request-domain environment. Use `clink env show <name> --json` to confirm `apiBaseUrl` before running write commands such as catalog import, checkout/session calls, or webhook endpoint ensure.
 
 ## Sandbox Fallback
 
@@ -212,6 +243,8 @@ Checks:
 
 - target environment is explicitly declared in all generated code and configuration
 - all base URLs in generated code match the target environment (`sandbox` = `https://uat-api.clinkbill.com`, `production` = `https://api.clinkbill.com`)
+- CLI command examples use the matching built-in environment (`--env sandbox` or `--env production`) or a documented custom environment confirmed by `clink env show <name> --json`
+- `--base-url` or `CLINK_BASE_URL` overrides are documented, temporary, and not used to bypass production validation
 - no production base URL appears in code generated under `sandbox` context
 - no sandbox base URL appears in code generated under `production` context
 - environment-specific secrets or keys are not hardcoded — placeholders reference the correct environment

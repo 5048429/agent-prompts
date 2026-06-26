@@ -12,8 +12,18 @@ import {
 } from "./runtime-machine.mjs";
 
 const ENVIRONMENTS = {
-  sandbox: { internal: "uat", baseUrl: "https://uat-api.clinkbill.com" },
-  production: { internal: "prod", baseUrl: "https://api.clinkbill.com" },
+  sandbox: {
+    internal: "uat",
+    baseUrl: "https://uat-api.clinkbill.com",
+    cliEnvironment: "sandbox",
+    cliApiBaseUrl: "https://uat-api.clinkbill.com/api/",
+  },
+  production: {
+    internal: "prod",
+    baseUrl: "https://api.clinkbill.com",
+    cliEnvironment: "production",
+    cliApiBaseUrl: "https://api.clinkbill.com/api/",
+  },
 };
 
 const PRODUCTION_SIGNALS = [
@@ -157,6 +167,8 @@ export function resolveEnvironment(targetEnvironment) {
     targetEnvironment: key,
     internalEnvironment: env.internal,
     baseUrl: env.baseUrl,
+    cliEnvironment: env.cliEnvironment,
+    cliApiBaseUrl: env.cliApiBaseUrl,
   };
 }
 
@@ -643,7 +655,8 @@ export function buildArtifacts({
     const artifacts = [
       buildArtifact("integration_checklist", "templates/standard-integration-checklist.md", "Checklist for checkout, webhook, reconciliation, and refund lifecycle"),
       buildArtifact("webhook_handler_checklist", "templates/webhook-handler-checklist.md", "Checklist for subscription, endpoint registration, signature verification, retries, and out-of-order tolerance"),
-      buildArtifact("cli_capability_checklist", null, "Verify clink-dev-cli from GitHub and confirm auth secret set, api request, catalog import, and webhook endpoint ensure are available"),
+      buildArtifact("cli_capability_checklist", null, "Verify clink-dev-cli from GitHub and confirm env, auth secret set, api request, catalog import, and webhook endpoint ensure are available"),
+      buildArtifact("cli_environment_checklist", null, "Resolve the CLI request domain with clink env list/show, use --env or CLINK_ENV for named environments, and reserve --base-url or CLINK_BASE_URL for one-off overrides that do not bypass production validation"),
       buildArtifact("webhook_endpoint_automation", null, "Configure the public HTTPS webhook with clink webhook endpoint ensure --events core --save-secret --json"),
       buildArtifact("signing_secret_sync", null, "Sync the returned or rotated webhook signing secret into CLINK_WEBHOOK_SIGNING_KEY and restart or redeploy before verification"),
       buildArtifact("merchant_order_mapping", null, "Map merchant order_id to merchantReferenceId and keep merchant-specific fulfillment data in the local order model"),
@@ -689,7 +702,8 @@ export function buildArtifacts({
       buildArtifact("new_user_onboarding_checklist", null, "Checklist for account access, MFA, merchant selection, user access, API keys, products, webhooks, and first checkout"),
       buildArtifact("dashboard_setup_checklist", null, "Dashboard setup checklist for Settings > Merchant, Settings > Users, Products, and Developers > API Keys"),
       buildArtifact("secret_setup_checklist", null, "Local clink login bootstrap or browserless manual Secret Key setup, clink auth secret set, webhook endpoint ensure, signing-secret sync, and safe storage placeholders"),
-      buildArtifact("cli_setup_checklist", null, "Install clink-dev-cli from GitHub and verify auth secret set, api request, catalog import, and webhook endpoint ensure"),
+      buildArtifact("cli_setup_checklist", null, "Install clink-dev-cli from GitHub and verify env, auth secret set, api request, catalog import, and webhook endpoint ensure"),
+      buildArtifact("cli_environment_checklist", null, "Use clink env list/show to confirm the sandbox request domain; add custom non-production request domains with clink env add when the maintainer provides them"),
       buildArtifact("webhook_endpoint_automation", null, "Use clink webhook endpoint ensure --events core --save-secret --json after the webhook route has a public HTTPS URL"),
       buildArtifact("first_checkout_smoke_test", null, "Sandbox first-checkout checklist using X-API-Key, X-Timestamp, product mode, success/cancel URLs, and merchantReferenceId reconciliation"),
       buildArtifact("next_path_recommendation", null, "Route the user to standard integration, generic agent integration, OpenClaw integration, or validation after onboarding"),

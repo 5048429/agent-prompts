@@ -38,6 +38,9 @@ This file is for final review and self-check. It is not the primary workflow doc
 - does the output avoid asking for `CLINK_WEBHOOK_SIGNING_KEY` as an initial user-provided secret
 - for local desktop setup without an existing Secret Key, does it use `clink login` only for human-assisted Dashboard login and then `clink dashboard apikey ensure-secret --save --json`
 - for cloud, low-code, sandbox, or browserless setup, does it ask only for `CLINK_SECRET_KEY` and then use `clink auth secret set --api-key env:CLINK_SECRET_KEY --env sandbox`
+- does it verify the CLI request domain with `clink env list` or `clink env show <name> --json` before write commands
+- if a custom request domain is needed, does it use `clink env add <name> --api-base-url <url>` and then `--env <name>` or `CLINK_ENV` instead of scattering raw URLs through generated code
+- are `--base-url` and `CLINK_BASE_URL` treated as documented one-off overrides, not as a way to bypass production validation
 - after `CLINK_SECRET_KEY` is configured, does it avoid requiring a Dashboard Console token for catalog import, checkout/subscription APIs, webhook endpoint management, doctor, smoke-test, or local webhook commands
 - when a Secret Key is requested or configured, does the output tell the user to get it from `Merchant Dashboard > Developers > API Keys` by clicking `Initialize Key`, copying it once, and storing it securely
 - does the output avoid asking the user to paste real webhook signing keys or Secret Keys into chat, generated source code, docs, logs, or public repositories

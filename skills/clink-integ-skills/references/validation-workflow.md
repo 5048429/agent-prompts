@@ -58,7 +58,7 @@ When the detected environment is `production`, run these checks before generatin
 ### Semantic Checks
 
 3. **Ownership-boundary validation** (all types): verify each component has a clear owner, no merchant code assumes Clink-owned behavior, no Clink behavior is duplicated in merchant code
-4. **Environment completeness validation** (all types): verify all base URLs match the target environment, no cross-environment URL leakage, environment-specific secrets use placeholders
+4. **Environment completeness validation** (all types): verify all base URLs match the target environment, CLI request-domain selection is confirmed with `clink env show <name> --json`, no cross-environment URL leakage, environment-specific secrets use placeholders
 
 ### Result Handling
 
@@ -98,6 +98,9 @@ Before emitting any code output, verify:
 
 - target environment is declared in all generated code and configuration
 - all base URLs match the target environment
+- CLI commands use `--env <name>` or `CLINK_ENV` for the resolved request-domain environment
+- any custom CLI environment is registered with `clink env add <name> --api-base-url <url>` and confirmed with `clink env show <name> --json`
+- `--base-url` and `CLINK_BASE_URL` are treated only as temporary one-off overrides and are not used to bypass production validation
 - no `https://api.clinkbill.com` appears in sandbox code
 - no `https://uat-api.clinkbill.com` appears in production code
 - environment-specific secrets reference the correct environment via placeholders

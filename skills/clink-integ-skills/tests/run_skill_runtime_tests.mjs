@@ -34,6 +34,7 @@ async function main() {
   check(standard.routeConfidence !== "low", "plain standard prompt should not be low-confidence");
   check(standard.questions.some((item) => item.includes("backend language")), "implementation without code context should ask for backend language");
   check(standard.artifacts.some((item) => item.name === "integration_checklist"), "standard route should emit integration_checklist artifact");
+  check(standard.artifacts.some((item) => item.name === "cli_environment_checklist"), "standard route should emit cli_environment_checklist artifact");
 
   const nodeStandard = await runSkillRuntime({
     prompt: "Help me implement Clink checkout session creation in this service.",
@@ -114,6 +115,7 @@ async function main() {
   check(onboarding.docsGateInvoked === true, "new user onboarding should invoke docs gate");
   check(onboarding.artifacts.some((item) => item.name === "new_user_onboarding_checklist"), "new user onboarding should emit onboarding checklist artifact");
   check(onboarding.artifacts.some((item) => item.name === "secret_setup_checklist"), "new user onboarding should emit secret setup checklist artifact");
+  check(onboarding.artifacts.some((item) => item.name === "cli_environment_checklist"), "new user onboarding should emit cli_environment_checklist artifact");
   check(
     onboarding.artifacts.find((item) => item.name === "secret_setup_checklist")?.summary?.includes("Local clink login bootstrap"),
     "new user onboarding secret setup should include local clink login bootstrap"
@@ -211,10 +213,14 @@ async function main() {
   check(sandboxResolved.baseUrl === "https://uat-api.clinkbill.com", "resolveEnvironment sandbox should return uat URL");
   check(sandboxResolved.internalEnvironment === "uat", "resolveEnvironment sandbox should return uat internal");
   check(sandboxResolved.targetEnvironment === "sandbox", "resolveEnvironment sandbox should return sandbox target");
+  check(sandboxResolved.cliEnvironment === "sandbox", "resolveEnvironment sandbox should return CLI sandbox environment");
+  check(sandboxResolved.cliApiBaseUrl === "https://uat-api.clinkbill.com/api/", "resolveEnvironment sandbox should return CLI sandbox API base URL");
 
   const prodResolved = resolveEnvironment("production");
   check(prodResolved.baseUrl === "https://api.clinkbill.com", "resolveEnvironment production should return prod URL");
   check(prodResolved.internalEnvironment === "prod", "resolveEnvironment production should return prod internal");
+  check(prodResolved.cliEnvironment === "production", "resolveEnvironment production should return CLI production environment");
+  check(prodResolved.cliApiBaseUrl === "https://api.clinkbill.com/api/", "resolveEnvironment production should return CLI production API base URL");
 
   // Unit: getEnvironmentSignals
   const goLiveSignals = getEnvironmentSignals("We need to go live with our integration");

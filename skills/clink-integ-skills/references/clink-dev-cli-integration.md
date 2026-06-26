@@ -27,6 +27,8 @@ Install the CLI from GitHub, not from npm registry, unless the user has confirme
 ```bash
 npm install --prefix ./.clink-tools github:5048429/clink-dev-cli
 ./.clink-tools/node_modules/.bin/clink --version
+./.clink-tools/node_modules/.bin/clink env list --help
+./.clink-tools/node_modules/.bin/clink env add --help
 ./.clink-tools/node_modules/.bin/clink auth secret set --help
 ./.clink-tools/node_modules/.bin/clink api request --help
 ./.clink-tools/node_modules/.bin/clink catalog import --help
@@ -44,6 +46,8 @@ Global install is optional for developer machines where global npm is known to w
 ```bash
 npm install -g --install-links=true github:5048429/clink-dev-cli
 clink --version
+clink env list --help
+clink env add --help
 clink auth secret set --help
 clink api request --help
 clink catalog import --help
@@ -51,6 +55,47 @@ clink webhook endpoint ensure --help
 ```
 
 GitHub installs should use the committed `dist/` output from the CLI repo. Do not add TypeScript build dependencies to the merchant project just because a GitHub install reports missing Node type declarations.
+
+## CLI Environment And Request Domain
+
+`clink-dev-cli` supports request-domain environment switching. Keep the skill's user-facing readiness model as `sandbox` and `production`, but use the CLI environment registry to ensure every CLI request goes to the intended API base URL.
+
+Built-in CLI environments:
+
+- `sandbox` -> `https://uat-api.clinkbill.com/api/`
+- `production` -> `https://api.clinkbill.com/api/`
+
+Before running API-writing commands, inspect the selected request domain:
+
+```bash
+clink env list
+clink env show sandbox --json
+clink --env sandbox auth status --json
+```
+
+If a maintainer provides a non-production staging, preview, regional, or private Clink API domain, register it as a named custom CLI environment instead of hardcoding URLs throughout project code:
+
+```bash
+clink env add staging \
+  --api-base-url https://staging-api.clinkbill.com/api/ \
+  --dashboard-base-url https://staging-dashboard.clinkbill.com/prod-api/ \
+  --dashboard-login-url https://staging-dashboard.clinkbill.com/auth/login \
+  --dashboard-client-id <client-id>
+
+clink env show staging --json
+clink --env staging auth status --json
+```
+
+Only `--api-base-url` is required for `clink env add`; Dashboard fields are needed only when the local desktop flow uses `clink login` or Dashboard-backed commands in that custom environment. Custom environments are stored in the CLI config under `environments`.
+
+Selection priority for CLI requests:
+
+1. command-line `--env <name>`
+2. `CLINK_ENV`
+3. the saved profile environment
+4. default `sandbox`
+
+`--base-url <url>` and `CLINK_BASE_URL` override the resolved API base URL for one-off debugging. Treat them as temporary overrides, document why they are used, and do not use them to bypass the production validation gate. If the override points at production or a production-like domain, run the production validation workflow first.
 
 ## Authentication
 
@@ -103,6 +148,14 @@ Allowed manual step:
 ```bash
 export CLINK_SECRET_KEY=sk_test_xxx
 clink auth secret set --api-key env:CLINK_SECRET_KEY --env sandbox
+clink auth status --json
+```
+
+When a custom non-production CLI environment has been explicitly registered and approved for the task, replace `sandbox` with that environment name:
+
+```bash
+export CLINK_ENV=staging
+clink auth secret set --api-key env:CLINK_SECRET_KEY --env staging
 clink auth status --json
 ```
 

@@ -10,7 +10,8 @@ A strong standard integration output should usually include:
 - webhook handler checklist
 - merchant order mapping notes
 - implementation TODO list
-- CLI capability checklist for `auth secret set`, `catalog import`, and `webhook endpoint ensure`
+- CLI capability checklist for `env`, `auth secret set`, `catalog import`, and `webhook endpoint ensure`
+- CLI environment checklist for `clink env list/show/add`, `--env`, `CLINK_ENV`, and documented one-off `--base-url` or `CLINK_BASE_URL` overrides
 - signing-secret sync and restart checklist
 - product-mode notes for registered vs non-registered flows
 
@@ -44,7 +45,7 @@ A strong new user onboarding output should usually include:
 
 - onboarding checklist for account access, password setup, MFA, merchant selection, and team access
 - dashboard setup checklist covering merchant profile, users, products, and API key access
-- secret setup checklist covering local `clink login` bootstrap, browserless manual Secret Key setup, CLI profile setup, webhook endpoint ensure, signing-secret sync, and safe storage placeholders
+- secret setup checklist covering local `clink login` bootstrap, browserless manual Secret Key setup, CLI profile setup, CLI request-domain environment selection, webhook endpoint ensure, signing-secret sync, and safe storage placeholders
 - product mode decision checklist for registered product mode vs non-registered product mode
 - first checkout smoke-test checklist for sandbox checkout session creation, signed simulated webhook verification, real sandbox payment, local order paid/completed verification, and entitlement/fulfillment completion
 - next-path recommendation that routes the user to standard integration, generic agent integration, OpenClaw integration, or validation
